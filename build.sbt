@@ -11,6 +11,8 @@ lazy val settings = Seq(
   version := projectV,
   scalaVersion := scalaV,
 
+  test in assembly := {},
+
   // set the main Scala source directory to be <base>/src
   scalaSource in Compile := baseDirectory.value / "src/main/scala",
 
@@ -29,7 +31,7 @@ lazy val settings = Seq(
 )
 
                                     /** projects */
-lazy val rootProject = project
+lazy val root = project
   .in(file("."))
   .settings(
     name := "kafka",
@@ -44,7 +46,10 @@ lazy val tmetadata = project
   .settings(
     name := "tmetadata",
     settings,
-    libraryDependencies ++= commonDependencies ++ testDependencies
+    libraryDependencies ++= commonDependencies ++ testDependencies,
+
+    mainClass in assembly := Some(s"$subRootPackage.tmetadata.Boot"),
+    assemblyJarName in assembly := "tmetadata-fat-jar.jar"
   )
 
                                       /** dependencies */
