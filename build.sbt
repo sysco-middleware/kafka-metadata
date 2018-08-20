@@ -46,36 +46,57 @@ lazy val tmetadata = project
   .settings(
     name := "tmetadata",
     settings,
-    libraryDependencies ++= commonDependencies ++ testDependencies,
+    libraryDependencies ++= commonDependencies ++ observabilityDependencies ++ testDependencies,
 
     mainClass in assembly := Some(s"$subRootPackage.tmetadata.Boot"),
     assemblyJarName in assembly := "tmetadata-fat-jar.jar"
   )
 
                                       /** dependencies */
-lazy val dependencies = new {
+lazy val allDependencies = new {
 
   val akkaHttpV     = "10.1.3"
   val akkaStreamsV  = "2.5.14"
   val scalaTestV    = "3.0.4"
   val slickV        = "3.2.3"
 
-  val akkaHttp            = "com.typesafe.akka"   %% "akka-http"            % akkaHttpV
-  val akkaStreams         = "com.typesafe.akka"   %% "akka-stream"          % akkaStreamsV
-  val akkaHttpCore        = "com.typesafe.akka"   %% "akka-http-core"       % akkaHttpV
-  val akkaHttpSpray       = "com.typesafe.akka"   %% "akka-http-spray-json" % akkaHttpV
+  val akkaHttp              = "com.typesafe.akka"   %% "akka-http"            % akkaHttpV
+  val akkaStreams           = "com.typesafe.akka"   %% "akka-stream"          % akkaStreamsV
+  val akkaHttpCore          = "com.typesafe.akka"   %% "akka-http-core"       % akkaHttpV
+  val akkaHttpSpray         = "com.typesafe.akka"   %% "akka-http-spray-json" % akkaHttpV
+
+  val kafkaV        = "1.0.0"
+
+  val kClients              = "org.apache.kafka"    % "kafka-clients"         % kafkaV
+
+
+
+  // observability (Logs, Metrics, Tracing)
+  val prometheusMetricsV    = "0.5.0"
+
+  val pSimpleClient         = "io.prometheus"     % "simpleclient"            % prometheusMetricsV
+  val pCommon               = "io.prometheus"     % "simpleclient_common"     % prometheusMetricsV
+  val pHotSpot              = "io.prometheus"     % "simpleclient_hotspot"    % prometheusMetricsV
 
   // test dependencies
-  val scalaTest           = "org.scalatest"       %% "scalatest"            % scalaTestV % Test
+  val scalaTest             = "org.scalatest"       %% "scalatest"            % scalaTestV % Test
 
 }
 
 lazy val commonDependencies = Seq(
-  dependencies.akkaHttp,
-  dependencies.akkaStreams,
-  dependencies.akkaHttpCore
+  allDependencies.akkaHttp,
+  allDependencies.akkaStreams,
+  allDependencies.akkaHttpCore,
+  allDependencies.akkaHttpSpray,
+  allDependencies.kClients
+)
+
+lazy val observabilityDependencies = Seq(
+  allDependencies.pSimpleClient,
+  allDependencies.pCommon,
+  allDependencies.pHotSpot
 )
 
 lazy val testDependencies = Seq(
-  dependencies.scalaTest
+  allDependencies.scalaTest
 )
