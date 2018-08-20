@@ -2,9 +2,14 @@ package no.sysco.middleware.kafka.tmetadata
 
 import com.typesafe.config.ConfigFactory
 
+object Env extends Enumeration {
+  type Env = Value
+  val dev, test = Value
+}
+
 case class KafkaConfig(bootstrapServers: String)
 case class RestConfig(serviceName: String, host: String, port: Int)
-case class ApplicationConfig(kafka:KafkaConfig, rest:RestConfig)
+case class ApplicationConfig(kafka:KafkaConfig, rest:RestConfig, env: Env.Value)
 
 object ConfigHolder {
 
@@ -16,7 +21,8 @@ object ConfigHolder {
       config.getString("service.host"),
       config.getInt("service.port")
     )
-    ApplicationConfig(kafka, rest)
+    val env = Env.withName(config.getString("environment").trim.toLowerCase)
+    ApplicationConfig(kafka, rest, env)
   }
 
 }

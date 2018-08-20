@@ -18,14 +18,16 @@ final case class TopicMetadata(
                                 format: String,
                                 scope: String,
                                 config: String,
-                                sla: Option[String]
-                              )
+                                sla: Option[String]){
+  override def toString: String = TopicVendorProtocol.json(this)
+}
 
 final case class Team(name: String, department: String)
 final case class TopicVendor(companyName: String)
 
 
 trait TopicVendorProtocol extends SprayJsonSupport with DefaultJsonProtocol {
+
   implicit def topicMetadataJsonFormat: RootJsonFormat[TopicMetadata] =
     jsonFormat(
       TopicMetadata,
@@ -40,4 +42,11 @@ trait TopicVendorProtocol extends SprayJsonSupport with DefaultJsonProtocol {
   implicit def teamJsonFormat: RootJsonFormat[Team] = jsonFormat(Team, "name", "department")
   implicit def topicVendorJsonFormat: RootJsonFormat[TopicVendor] = jsonFormat(TopicVendor, "company_name")
 
+
+}
+
+object TopicVendorProtocol extends TopicVendorProtocol {
+  import spray.json._
+
+  private[rest] def json(topicMetadata: TopicMetadata):String = topicMetadata.toJson.toString
 }
