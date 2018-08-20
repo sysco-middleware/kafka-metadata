@@ -1,0 +1,17 @@
+{
+  "topic_name": "new topic",
+  "description": "some long description",
+  "producers": [
+    {
+      "name": "Cool team",
+      "department": "sysco-middleware"
+    }
+  ],
+  "topic_vendor": {
+    "company_name": "STATNETT"
+  },
+  "format": "XML",
+  "scope": "some internal scope",
+  "config": "additional configuration",
+  "sla": "optional string"
+}
