@@ -10,6 +10,7 @@ import no.sysco.middleware.kafka.tmetadata.rest.HttpService
 import scala.concurrent.duration._
 import scala.concurrent.{Await, ExecutionContextExecutor, Future}
 
+// todo: add supervisor and extends it
 object Main extends App with HttpService {
 
   implicit val system = ActorSystem("akka-reactive-kafka-app")
