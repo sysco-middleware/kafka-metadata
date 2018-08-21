@@ -1,4 +1,6 @@
 // Project setup
+import Dependencies._
+
 val rootPackage = "no.sysco.middleware"
 val subRootPackage = s"$rootPackage.kafka"
 val projectV = "0.0.1-SNAPSHOT"
@@ -28,6 +30,9 @@ lazy val settings = Seq(
   // only use a single thread for building
   parallelExecution := false,
 
+  //Run tests Sequentially
+  parallelExecution in Test := false
+
 )
 
                                     /** projects */
@@ -48,55 +53,26 @@ lazy val tmetadata = project
     settings,
     libraryDependencies ++= commonDependencies ++ observabilityDependencies ++ testDependencies,
 
-    mainClass in assembly := Some(s"$subRootPackage.tmetadata.Boot"),
+    mainClass in assembly := Some(s"$subRootPackage.tmetadata.Main"),
     assemblyJarName in assembly := "tmetadata-fat-jar.jar"
   )
 
                                       /** dependencies */
-lazy val allDependencies = new {
-
-  val akkaHttpV     = "10.1.3"
-  val akkaStreamsV  = "2.5.14"
-  val scalaTestV    = "3.0.4"
-  val slickV        = "3.2.3"
-
-  val akkaHttp              = "com.typesafe.akka"   %% "akka-http"            % akkaHttpV
-  val akkaStreams           = "com.typesafe.akka"   %% "akka-stream"          % akkaStreamsV
-  val akkaHttpCore          = "com.typesafe.akka"   %% "akka-http-core"       % akkaHttpV
-  val akkaHttpSpray         = "com.typesafe.akka"   %% "akka-http-spray-json" % akkaHttpV
-
-  val kafkaV        = "1.0.0"
-
-  val kClients              = "org.apache.kafka"    % "kafka-clients"         % kafkaV
-
-
-
-  // observability (Logs, Metrics, Tracing)
-  val prometheusMetricsV    = "0.5.0"
-
-  val pSimpleClient         = "io.prometheus"     % "simpleclient"            % prometheusMetricsV
-  val pCommon               = "io.prometheus"     % "simpleclient_common"     % prometheusMetricsV
-  val pHotSpot              = "io.prometheus"     % "simpleclient_hotspot"    % prometheusMetricsV
-
-  // test dependencies
-  val scalaTest             = "org.scalatest"       %% "scalatest"            % scalaTestV % Test
-
-}
-
 lazy val commonDependencies = Seq(
-  allDependencies.akkaHttp,
-  allDependencies.akkaStreams,
-  allDependencies.akkaHttpCore,
-  allDependencies.akkaHttpSpray,
-  allDependencies.kClients
+  akka_http,
+  akka_streams,
+  akka_http_core,
+  akka_http_spray,
+  kafka_clients,
+  kafka_streams,
+  log4j_over_slf4j,
+  akka_slf4j
 )
-
 lazy val observabilityDependencies = Seq(
-  allDependencies.pSimpleClient,
-  allDependencies.pCommon,
-  allDependencies.pHotSpot
+  prometheus_simple_client,
+  prometheus_common,
+  prometheus_hot_spot
 )
-
 lazy val testDependencies = Seq(
-  allDependencies.scalaTest
+  scala_test
 )

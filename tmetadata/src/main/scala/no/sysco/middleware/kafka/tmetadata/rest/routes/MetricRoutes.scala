@@ -1,4 +1,4 @@
-package no.sysco.middleware.kafka.tmetadata.rest.route
+package no.sysco.middleware.kafka.tmetadata.rest.routes
 
 import java.io.{StringWriter, Writer}
 
@@ -7,9 +7,9 @@ import akka.http.scaladsl.server.Directives.{complete, get, path, pathEndOrSingl
 import io.prometheus.client.CollectorRegistry
 import io.prometheus.client.exporter.common.TextFormat
 
-object MetricsRoutes {
+trait MetricRoutes {
 
-  private[rest] val metricRoute = path("metrics") {
+  val metricRoutes = path("metrics") {
     pathEndOrSingleSlash{
       get {
         val writer: Writer = new StringWriter()
