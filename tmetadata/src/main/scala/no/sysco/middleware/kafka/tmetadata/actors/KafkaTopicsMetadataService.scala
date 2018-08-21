@@ -2,7 +2,7 @@ package no.sysco.middleware.kafka.tmetadata.actors
 
 
 import akka.actor.{Actor, ActorLogging, Props}
-import no.sysco.middleware.kafka.tmetadata.infrastructure.KafkaRepository
+import no.sysco.middleware.kafka.tmetadata.infrastructure.KafkaTopicsMetadataRepositoryWrite
 import no.sysco.middleware.kafka.tmetadata.rest.TopicMetadata
 import no.sysco.middleware.kafka.tmetadata.{ApplicationConfig, Env}
 
@@ -28,7 +28,9 @@ class KafkaServiceActor(config: ApplicationConfig) extends Actor with ActorLoggi
   import no.sysco.middleware.kafka.tmetadata.actors.KafkaService._
 
 
-  val kafkaRepository = KafkaRepository.initRepository(config)
+  val kafkaRepository = KafkaTopicsMetadataRepositoryWrite.initRepository(config)
+
+
   override def receive: Receive = {
     case command: RegisterTopicMetadataCommand => {
       log.info("Command got {}", command)
@@ -47,6 +49,6 @@ class MockService(config: ApplicationConfig) extends Actor with ActorLogging {
     case command: RegisterTopicMetadataCommand => {
       println(s"I am mocked repo, here is command: $command")
     }
-    case _ => {}
+    case unexpected => log.error("Unexpected {}", unexpected)
   }
 }

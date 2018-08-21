@@ -11,13 +11,13 @@ import org.apache.kafka.common.serialization.StringSerializer
 import scala.concurrent.{ExecutionContext, Future, Promise}
 import scala.util.Try
 
-object KafkaRepository {
+object KafkaTopicsMetadataRepositoryWrite {
 
-  val topic = "topics-metadata"
+  val topic = Topics.METADATA
 
-  def initRepository(config: ApplicationConfig)(implicit executionContext: ExecutionContext):KafkaRepository = {
+  def initRepository(config: ApplicationConfig)(implicit executionContext: ExecutionContext):KafkaTopicsMetadataRepositoryWrite = {
     val kafkaProducer: KafkaProducer[String, String] = new KafkaProducer(producerProps(config))
-    new KafkaRepository(kafkaProducer, topic)
+    new KafkaTopicsMetadataRepositoryWrite(kafkaProducer, topic)
   }
   def producerProps(config: ApplicationConfig):Properties = {
     val props = new Properties()
@@ -30,7 +30,7 @@ object KafkaRepository {
 
 }
 
-class KafkaRepository(kafkaProducer: KafkaProducer[String, String], topic: String)(implicit executionContext: ExecutionContext) {
+class KafkaTopicsMetadataRepositoryWrite(kafkaProducer: KafkaProducer[String, String], topic: String)(implicit executionContext: ExecutionContext) {
 
   def registerSync(command: RegisterTopicMetadataCommand): ResultEvent = {
     val record = new ProducerRecord[String, String](topic, command.json.topicName, command.json.toString)
