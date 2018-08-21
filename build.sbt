@@ -53,7 +53,7 @@ lazy val tmetadata = project
     settings,
     libraryDependencies ++= commonDependencies ++ observabilityDependencies ++ testDependencies,
 
-    mainClass in assembly := Some(s"$subRootPackage.tmetadata.Boot"),
+    mainClass in assembly := Some(s"$subRootPackage.tmetadata.Main"),
     assemblyJarName in assembly := "tmetadata-fat-jar.jar"
   )
 
@@ -64,7 +64,9 @@ lazy val commonDependencies = Seq(
   akka_http_core,
   akka_http_spray,
   kafka_clients,
-  kafka_streams
+  kafka_streams,
+  log4j_over_slf4j,
+  akka_slf4j
 )
 lazy val observabilityDependencies = Seq(
   prometheus_simple_client,
