@@ -10,6 +10,8 @@ import spray.json.{DefaultJsonProtocol, RootJsonFormat}
 //* scope (public,private)
 //* configs (retention, etc)
 //* SLAs
+
+// Validation http://fruzenshtein.com/akka-http-model-validation-field-by-field/
 final case class TopicMetadata(
                                 topicName: String,
                                 description: String,
@@ -18,12 +20,20 @@ final case class TopicMetadata(
                                 format: String,
                                 scope: String,
                                 config: String,
-                                sla: Option[String]){
+                                sla: Option[String]) {
+  require(!topicName.isEmpty, "topic_name must not be empty")
+
   override def toString: String = TopicVendorProtocol.json(this)
 }
 
-final case class Team(name: String, department: String)
-final case class TopicVendor(companyName: String)
+final case class Team(name: String, department: String) {
+  require(!name.isEmpty, "team.name must not be empty")
+  require(!department.isEmpty, "team.departament must not be empty")
+}
+
+final case class TopicVendor(companyName: String) {
+  require(!companyName.isEmpty, "company_name must not be empty")
+}
 
 
 trait TopicVendorProtocol extends SprayJsonSupport with DefaultJsonProtocol {
@@ -48,5 +58,5 @@ trait TopicVendorProtocol extends SprayJsonSupport with DefaultJsonProtocol {
 object TopicVendorProtocol extends TopicVendorProtocol {
   import spray.json._
 
-  private[rest] def json(topicMetadata: TopicMetadata):String = topicMetadata.toJson.toString
+  private[rest] def json(topicMetadata: TopicMetadata): String = topicMetadata.toJson.toString
 }
