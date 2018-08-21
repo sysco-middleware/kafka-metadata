@@ -2,7 +2,7 @@ package no.sysco.middleware.kafka.tmetadata.rest.route
 
 
 import akka.actor.ActorRef
-import akka.http.scaladsl.model.{HttpEntity, HttpResponse, MediaTypes, StatusCodes}
+import akka.http.scaladsl.model._
 import akka.http.scaladsl.server.Directives._
 import no.sysco.middleware.kafka.tmetadata.actors.KafkaService.{RegisterTopicMetadataCommand, ResultEvent}
 import no.sysco.middleware.kafka.tmetadata.rest.{TopicMetadata, TopicVendorProtocol}
@@ -29,7 +29,7 @@ class AppRoutes(kafkaServiceRef: ActorRef)(implicit executionContext: ExecutionC
               case rez: ResultEvent => if (rez.success) {
                 complete(StatusCodes.OK)
               } else {
-                complete(StatusCodes.BadRequest)
+                complete(HttpResponse(StatusCodes.BadRequest, entity = HttpEntity(ContentTypes.`text/html(UTF-8)`, rez.message)))
               }
             }
           }
