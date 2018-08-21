@@ -1,9 +1,9 @@
-package no.sysco.middleware.kafka.tmetadata.impl2.http.routes
+package no.sysco.middleware.kafka.tmetadata.rest.routes
 
 import akka.actor.ActorRef
 import akka.event.LoggingAdapter
 import akka.http.scaladsl.model._
-import akka.http.scaladsl.server.Directives.{as, complete, entity, get, path, pathEndOrSingleSlash, post, _}
+import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
 import akka.pattern._
 import akka.util.Timeout

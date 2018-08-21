@@ -1,4 +1,4 @@
-package no.sysco.middleware.kafka.tmetadata.impl2.http.routes
+package no.sysco.middleware.kafka.tmetadata.rest.routes
 
 import java.io.{StringWriter, Writer}
 

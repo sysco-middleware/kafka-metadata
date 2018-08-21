@@ -1,15 +1,12 @@
-package no.sysco.middleware.kafka.tmetadata.impl2
+package no.sysco.middleware.kafka.tmetadata
 
-import akka.actor.{ActorSystem, Props}
+import akka.actor.ActorSystem
 import akka.event.Logging
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.Http.ServerBinding
 import akka.stream.ActorMaterializer
-import no.sysco.middleware.kafka.tmetadata.Boot.{config, system}
-import no.sysco.middleware.kafka.tmetadata.Config
 import no.sysco.middleware.kafka.tmetadata.actors.KafkaService
-import no.sysco.middleware.kafka.tmetadata.impl2.http.HttpService
-
+import no.sysco.middleware.kafka.tmetadata.rest.HttpService
 import scala.concurrent.duration._
 import scala.concurrent.{Await, ExecutionContextExecutor, Future}
 
