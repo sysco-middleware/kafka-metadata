@@ -2,34 +2,27 @@ package no.sysco.middleware.kafka.tmetadata
 
 import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
-import akka.pattern.Patterns
 import akka.stream.ActorMaterializer
-import no.sysco.middleware.kafka.tmetadata.actors.{ApplicationSupervisor, RouteRequest, RouteResponse}
-
-import scala.concurrent.Future
+import no.sysco.middleware.kafka.tmetadata.actors.KafkaService
+import no.sysco.middleware.kafka.tmetadata.rest.HttpRoutes
+//import no.sysco.middleware.kafka.tmetadata.actors.{ApplicationSupervisor, RouteRequest, RouteResponse}
 
 object Boot extends App {
 
   // config
-  val config = ConfigHolder.loadConfig()
+  val config = Config.loadConfig()
 
   // actor system
   implicit val system = ActorSystem("kafka-management-operations")
   implicit val materializer = ActorMaterializer()
   implicit val executionContext = system.dispatcher
 
-  // app
-  val supervisor = system.actorOf(ApplicationSupervisor.props(config), "tmetadata-app-supervisor")
 
-  //todo: how to get routes
-  // 1. Get supervised ref
-  // 2. Define routes separately with kafkaService
-
-//  val asked= Patterns.ask(supervisor, RouteRequest, 2000)
-//  val result: Future[RouteResponse] =
-//  val r = supervisor ! RouteRequest
+  val kafkaService = system.actorOf(KafkaService.props(config), "kafka-service-actor")
+  val routes = new HttpRoutes(kafkaService).routes
 
 
-//  val bindingFuture = Http().bindAndHandle(supervisor., config.http.host, config.http.port)
+  val bindingFuture = Http().bindAndHandle(routes, config.rest.host, config.rest.port)
+
 
 }

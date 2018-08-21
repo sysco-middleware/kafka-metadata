@@ -11,7 +11,7 @@ case class KafkaConfig(bootstrapServers: String)
 case class RestConfig(serviceName: String, host: String, port: Int)
 case class ApplicationConfig(kafka:KafkaConfig, rest:RestConfig, env: Env.Value)
 
-object ConfigHolder {
+object Config {
 
   def loadConfig():ApplicationConfig = {
     val config = ConfigFactory.load()

@@ -2,12 +2,19 @@ package no.sysco.middleware.kafka.tmetadata.rest.route
 
 
 import akka.actor.ActorRef
-import akka.http.scaladsl.model.StatusCodes
+import akka.http.scaladsl.model.{HttpEntity, HttpResponse, MediaTypes, StatusCodes}
 import akka.http.scaladsl.server.Directives._
-import no.sysco.middleware.kafka.tmetadata.actors.RegisterTopicMetadataCommand
+import no.sysco.middleware.kafka.tmetadata.actors.KafkaService.{RegisterTopicMetadataCommand, ResultEvent}
 import no.sysco.middleware.kafka.tmetadata.rest.{TopicMetadata, TopicVendorProtocol}
+import akka.pattern.ask
+import akka.util.Timeout
 
-class AppRoutes(kafkaService: ActorRef) extends TopicVendorProtocol{
+import scala.concurrent.ExecutionContext
+import scala.concurrent.duration._ //For the timeout duratino "5 seconds"
+
+class AppRoutes(kafkaServiceRef: ActorRef)(implicit executionContext: ExecutionContext) extends TopicVendorProtocol{
+
+  implicit lazy val timeout = Timeout(5 seconds)
 
   private[rest] val appRoutes = path("topics") {
     get {
@@ -15,14 +22,20 @@ class AppRoutes(kafkaService: ActorRef) extends TopicVendorProtocol{
         complete(StatusCodes.OK)
       }
     } ~
-    post {
-      pathEndOrSingleSlash{
-        entity(as[TopicMetadata]){ json =>
-          println(RegisterTopicMetadataCommand(json))
-          complete(StatusCodes.OK)
+      post {
+        pathEndOrSingleSlash{
+          entity(as[TopicMetadata]){ json =>
+            onSuccess(kafkaServiceRef ? RegisterTopicMetadataCommand(json)){
+              case rez: ResultEvent => if (rez.success) {
+                complete(StatusCodes.OK)
+              } else {
+                complete(StatusCodes.BadRequest)
+              }
+            }
+          }
         }
       }
-    }
-
   }
+
 }
+
