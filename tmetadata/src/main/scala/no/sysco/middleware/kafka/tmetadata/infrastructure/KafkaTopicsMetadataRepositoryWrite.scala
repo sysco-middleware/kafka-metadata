@@ -3,7 +3,7 @@ package no.sysco.middleware.kafka.tmetadata.infrastructure
 import java.util.Properties
 
 import no.sysco.middleware.kafka.tmetadata.ApplicationConfig
-import no.sysco.middleware.kafka.tmetadata.actors.KafkaService.{RegisterTopicMetadataCommand, ResultEvent}
+import no.sysco.middleware.kafka.tmetadata.actors.KafkaService.{RegisterTopicMetadata, RegisteredTopicMetadataAttempt}
 
 import org.apache.kafka.clients.producer._
 import org.apache.kafka.common.serialization.StringSerializer
@@ -32,24 +32,24 @@ object KafkaTopicsMetadataRepositoryWrite {
 
 class KafkaTopicsMetadataRepositoryWrite(kafkaProducer: KafkaProducer[String, String], topic: String)(implicit executionContext: ExecutionContext) {
 
-  def registerSync(command: RegisterTopicMetadataCommand): ResultEvent = {
+  def registerSync(command: RegisterTopicMetadata): RegisteredTopicMetadataAttempt = {
     val record = new ProducerRecord[String, String](topic, command.json.topicName, command.json.toString)
     try {
       kafkaProducer.send(record)
-      ResultEvent()
+      RegisteredTopicMetadataAttempt()
     } catch {
       case e: Exception =>
         e.printStackTrace()
-        ResultEvent(success = false, message = e.getMessage)
+        RegisteredTopicMetadataAttempt(success = false, message = e.getMessage)
     }
   }
 
-  def registerAsync(command: RegisterTopicMetadataCommand): Future[ResultEvent] = {
+  def registerAsync(command: RegisterTopicMetadata): Future[RegisteredTopicMetadataAttempt] = {
     val record = new ProducerRecord[String, String](topic, command.json.topicName, command.json.toString)
-    val promise = Promise[ResultEvent]()
+    val promise = Promise[RegisteredTopicMetadataAttempt]()
     kafkaProducer.send(record, new Callback {
       override def onCompletion(metadata: RecordMetadata, exception: Exception): Unit = {
-        val result = if (exception == null) ResultEvent() else ResultEvent(success = false, exception.getMessage)
+        val result = if (exception == null) RegisteredTopicMetadataAttempt() else RegisteredTopicMetadataAttempt(success = false, exception.getMessage)
         promise.complete(Try(result))
       }
     })

@@ -7,7 +7,7 @@ import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
 import akka.pattern._
 import akka.util.Timeout
-import no.sysco.middleware.kafka.tmetadata.actors.KafkaService.{RegisterTopicMetadataCommand, ResultEvent}
+import no.sysco.middleware.kafka.tmetadata.actors.KafkaService.{FetchTopicsMetadata, FetchedTopicsMetadata, RegisterTopicMetadata, RegisteredTopicMetadataAttempt}
 import no.sysco.middleware.kafka.tmetadata.rest.{TopicMetadata, TopicVendorProtocol}
 
 import scala.concurrent.duration._ //For the timeout duratino "5 seconds"
@@ -22,13 +22,17 @@ trait AppRoutes extends TopicVendorProtocol {
   val appHttpRoutes: Route = path("topics") {
     get {
       pathEndOrSingleSlash {
-        complete(StatusCodes.OK)
+        onSuccess(kafkaService ? FetchTopicsMetadata){
+          case rez: FetchedTopicsMetadata => complete(rez.topicsMetadata)
+        }
       }
     } ~
       post {
         entity(as[TopicMetadata]) { json =>
-          onSuccess(kafkaService ? RegisterTopicMetadataCommand(json)){
-            case rez: ResultEvent => if (rez.success) {
+          println(json)
+          log.info("Endpoint /topics, payload: {}", json)
+          onSuccess(kafkaService ? RegisterTopicMetadata(json)){
+            case rez: RegisteredTopicMetadataAttempt => if (rez.success) {
               complete(StatusCodes.OK)
             } else {
               complete(HttpResponse(StatusCodes.BadRequest, entity = HttpEntity(ContentTypes.`text/html(UTF-8)`, rez.message)))

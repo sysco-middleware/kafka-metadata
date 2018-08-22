@@ -2,12 +2,14 @@ package no.sysco.middleware.kafka.tmetadata.actors
 
 import akka.actor.{Actor, ActorLogging, Props}
 
-
-object AppSupervisor {
-  def props(): Props = Props(new AppSupervisor)
+/**
+  * This actor service works as a application supervisor
+  * */
+object AppService {
+  def props(): Props = Props(new AppService)
 }
 
-class AppSupervisor extends Actor with ActorLogging {
+class AppService extends Actor with ActorLogging {
   override def preStart(): Unit = log.info("Application started")
   override def postStop(): Unit = log.info("Application stopped")
 

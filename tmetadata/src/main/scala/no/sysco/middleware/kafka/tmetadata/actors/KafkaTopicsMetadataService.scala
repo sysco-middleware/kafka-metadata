@@ -1,8 +1,10 @@
 package no.sysco.middleware.kafka.tmetadata.actors
 
 
+import java.util.concurrent.CountDownLatch
+
 import akka.actor.{Actor, ActorLogging, Props}
-import no.sysco.middleware.kafka.tmetadata.infrastructure.KafkaTopicsMetadataRepositoryWrite
+import no.sysco.middleware.kafka.tmetadata.infrastructure.{KafkaTopicsMetadataRepositoryRead, KafkaTopicsMetadataRepositoryWrite}
 import no.sysco.middleware.kafka.tmetadata.rest.TopicMetadata
 import no.sysco.middleware.kafka.tmetadata.{ApplicationConfig, Env}
 
@@ -17,8 +19,13 @@ object KafkaService {
   }
 
   sealed trait Command
-  final case class RegisterTopicMetadataCommand(json: TopicMetadata) extends Command
-  final case class ResultEvent(success: Boolean = true, message: String = "")
+  sealed trait Event
+
+  final case class RegisterTopicMetadata(json: TopicMetadata) extends Command
+  final case class RegisteredTopicMetadataAttempt(success: Boolean = true, message: String = "") extends Event
+
+  final case class FetchTopicsMetadata() extends Command
+  final case class FetchedTopicsMetadata(topicsMetadata : Seq[TopicMetadata]) extends Event
 }
 
 class KafkaServiceActor(config: ApplicationConfig) extends Actor with ActorLogging {
@@ -27,17 +34,27 @@ class KafkaServiceActor(config: ApplicationConfig) extends Actor with ActorLoggi
 
   import no.sysco.middleware.kafka.tmetadata.actors.KafkaService._
 
+  val kafkaRepositoryWrite = KafkaTopicsMetadataRepositoryWrite.initRepository(config)
+//  val kafkaRepositoryRead = KafkaTopicsMetadataRepositoryRead.initRepository(config)
 
-  val kafkaRepository = KafkaTopicsMetadataRepositoryWrite.initRepository(config)
-
+  override def preStart(): Unit = {
+//    kafkaRepositoryRead.addShutdownHook(new CountDownLatch(1), "kafka-streams-app")
+    super.preStart()
+  }
 
   override def receive: Receive = {
-    case command: RegisterTopicMetadataCommand => {
+    case command: RegisterTopicMetadata => {
       log.info("Command got {}", command)
-      sender() ! kafkaRepository.registerSync(command)
+      sender() ! kafkaRepositoryWrite.registerSync(command)
     }
+//    case command: FetchTopicsMetadata => {
+//      log.info("Command got {}", command)
+//      sender() ! kafkaRepositoryRead.topicsMetadata()
+//    }
     case unexpected =>  log.error("Unexpected {}", unexpected)
   }
+
+
 
 
 }
@@ -46,7 +63,7 @@ class MockService(config: ApplicationConfig) extends Actor with ActorLogging {
   import no.sysco.middleware.kafka.tmetadata.actors.KafkaService._
 
   override def receive: Receive = {
-    case command: RegisterTopicMetadataCommand => {
+    case command: RegisterTopicMetadata => {
       println(s"I am mocked repo, here is command: $command")
     }
     case unexpected => log.error("Unexpected {}", unexpected)
