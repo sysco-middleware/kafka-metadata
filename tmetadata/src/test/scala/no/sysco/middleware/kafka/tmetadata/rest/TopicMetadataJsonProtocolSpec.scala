@@ -6,7 +6,7 @@ import org.scalatest._
 import org.scalatest.{Matchers, WordSpec}
 
 
-class TopicMetadataProtocolSpec extends WordSpec with Matchers with TopicVendorProtocol {
+class TopicMetadataJsonProtocolSpec extends WordSpec with Matchers with TopicMetadataJsonProtocol {
 
   import spray.json._
 

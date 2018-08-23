@@ -44,6 +44,7 @@ lazy val root = project
     version := projectV
   )
   .aggregate(
+    utils,
     tmetadata
   )
 
@@ -56,6 +57,17 @@ lazy val tmetadata = project
     mainClass in assembly := Some(s"$subRootPackage.tmetadata.Main"),
     assemblyJarName in assembly := "tmetadata-fat-jar.jar"
   )
+  .dependsOn(utils)
+
+lazy val utils = project
+  .settings(
+    name := "utils",
+    settings,
+    libraryDependencies ++= Seq(
+      kafka_clients,
+      kafka_streams
+    )
+  )
 
                                       /** dependencies */
 lazy val commonDependencies = Seq(
@@ -65,7 +77,6 @@ lazy val commonDependencies = Seq(
   akka_http_spray,
   kafka_clients,
   kafka_streams,
-  log4j_over_slf4j,
   akka_slf4j
 )
 lazy val observabilityDependencies = Seq(

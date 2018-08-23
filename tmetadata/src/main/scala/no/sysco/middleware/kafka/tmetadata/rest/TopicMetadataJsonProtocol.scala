@@ -14,29 +14,29 @@ import spray.json.{DefaultJsonProtocol, RootJsonFormat}
 // Validation http://fruzenshtein.com/akka-http-model-validation-field-by-field/
 final case class TopicMetadata(
                                 topicName: String,
-                                description: String,
-                                producers: List[Team],
-                                topicVendor: TopicVendor,
-                                format: String,
-                                scope: String,
-                                config: String,
-                                sla: Option[String]) {
+                                description: String = "",
+                                producers: List[Team] = List.empty[Team],
+                                topicVendor: TopicVendor = TopicVendor(),
+                                format: String = "",
+                                scope: String = "",
+                                config: String = "",
+                                sla: Option[String] = Option.empty) {
   require(!topicName.isEmpty, "topic_name must not be empty")
 
-  override def toString: String = TopicVendorProtocol.json(this)
+  override def toString: String = TopicMetadataJsonProtocol.json(this)
 }
 
-final case class Team(name: String, department: String) {
-  require(!name.isEmpty, "team.name must not be empty")
-  require(!department.isEmpty, "team.departament must not be empty")
+final case class Team(name: String = "", department: String = "") {
+//  require(!name.isEmpty, "team.name must not be empty")
+//  require(!department.isEmpty, "team.departament must not be empty")
 }
 
-final case class TopicVendor(companyName: String) {
-  require(!companyName.isEmpty, "company_name must not be empty")
+final case class TopicVendor(companyName: String = "") {
+//  require(!companyName.isEmpty, "company_name must not be empty")
 }
 
 
-trait TopicVendorProtocol extends SprayJsonSupport with DefaultJsonProtocol {
+trait TopicMetadataJsonProtocol extends SprayJsonSupport with DefaultJsonProtocol {
 
   implicit def topicMetadataJsonFormat: RootJsonFormat[TopicMetadata] =
     jsonFormat(
@@ -55,7 +55,7 @@ trait TopicVendorProtocol extends SprayJsonSupport with DefaultJsonProtocol {
 
 }
 
-object TopicVendorProtocol extends TopicVendorProtocol {
+object TopicMetadataJsonProtocol extends TopicMetadataJsonProtocol {
   import spray.json._
 
   private[rest] def json(topicMetadata: TopicMetadata): String = topicMetadata.toJson.toString
