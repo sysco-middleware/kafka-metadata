@@ -56,4 +56,9 @@ class KafkaTopicsMetadataRepositoryWrite(kafkaProducer: KafkaProducer[String, St
     promise.future
   }
 
+  // todo: proper batch
+  def registerBatch(listCommands: Seq[RegisterTopicMetadata]) =
+    listCommands.foreach(command => kafkaProducer.send(new ProducerRecord[String , String](topic, command.json.topicName, command.json.toString)))
+
+
 }

@@ -4,7 +4,7 @@ import java.util.Properties
 import java.util.concurrent.CountDownLatch
 
 import no.sysco.middleware.kafka.tmetadata.ApplicationConfig
-import no.sysco.middleware.kafka.tmetadata.rest.{TopicMetadata, TopicVendorProtocol}
+import no.sysco.middleware.kafka.tmetadata.rest.{TopicMetadata, TopicMetadataJsonProtocol}
 import org.apache.kafka.clients.admin.AdminClientConfig
 import org.apache.kafka.common.utils.Bytes
 import org.apache.kafka.streams.kstream.Materialized
@@ -23,17 +23,13 @@ object KafkaTopicsMetadataRepositoryRead {
 
 }
 
-class KafkaTopicsMetadataRepositoryRead(config: ApplicationConfig) extends TopicVendorProtocol {
+class KafkaTopicsMetadataRepositoryRead(config: ApplicationConfig) extends TopicMetadataJsonProtocol {
   val topic = Topics.METADATA
   val storageName = Topics.METADATA_STORAGE
 
   val builder = new StreamsBuilder
   val topology = buildTopology(builder)
   val streams: KafkaStreams = new KafkaStreams(topology, getProps())
-  // TODO: try start stream here
-
-
-
 
   def getProps(): Properties = {
     val props = new Properties

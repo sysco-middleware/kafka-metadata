@@ -9,11 +9,11 @@ import akka.pattern._
 import akka.util.Timeout
 import no.sysco.middleware.kafka.tmetadata.application.KafkaService
 import no.sysco.middleware.kafka.tmetadata.application.KafkaService.{FetchTopicsMetadata, FetchedTopicsMetadata, RegisterTopicMetadata, RegisteredTopicMetadataAttempt}
-import no.sysco.middleware.kafka.tmetadata.rest.{TopicMetadata, TopicVendorProtocol}
+import no.sysco.middleware.kafka.tmetadata.rest.{TopicMetadata, TopicMetadataJsonProtocol}
 
 import scala.concurrent.duration._ //For the timeout duratino "5 seconds"
 
-trait AppRoutes extends TopicVendorProtocol {
+trait AppRoutes extends TopicMetadataJsonProtocol {
 
   def kafkaService: KafkaService
 
