@@ -5,7 +5,7 @@ import akka.event.Logging
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.Http.ServerBinding
 import akka.stream.ActorMaterializer
-import no.sysco.middleware.kafka.tmetadata.application.KafkaTopicsMetadataService
+import no.sysco.middleware.kafka.tmetadata.application.{KafkaTopicsMetadataService, KafkaTopicsObserverActor}
 import no.sysco.middleware.kafka.tmetadata.rest.HttpRoutes
 
 import scala.concurrent.duration._
@@ -23,10 +23,12 @@ object Main extends App with HttpRoutes {
 
   override def kafkaService = new KafkaTopicsMetadataService(config)
 
+  // Observer actor
+  val observer = system.actorOf(KafkaTopicsObserverActor.props(config, kafkaService), "kafka-topics-observer")
+
   //Start the akka-http server and listen for http requests
   val akkaHttpServer = startAkkaHTTPServer(config.rest.host, config.rest.port)
 
-  // create producer
 
 
   private def startAkkaHTTPServer(host: String, port: Int): Future[ServerBinding] = {
