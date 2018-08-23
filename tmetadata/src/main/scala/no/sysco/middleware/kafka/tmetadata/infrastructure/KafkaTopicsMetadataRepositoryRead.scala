@@ -4,14 +4,12 @@ import java.util.Properties
 import java.util.concurrent.CountDownLatch
 
 import no.sysco.middleware.kafka.tmetadata.ApplicationConfig
-import no.sysco.middleware.kafka.tmetadata.infrastructure.KafkaTopicsMetadataRepositoryWrite.{producerProps, topic}
 import no.sysco.middleware.kafka.tmetadata.rest.{TopicMetadata, TopicVendorProtocol}
 import org.apache.kafka.clients.admin.AdminClientConfig
-import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.kafka.common.utils.Bytes
 import org.apache.kafka.streams.kstream.Materialized
 import org.apache.kafka.streams.state.{KeyValueIterator, KeyValueStore, QueryableStoreTypes, ReadOnlyKeyValueStore}
-import org.apache.kafka.streams.{KafkaStreams, StreamsBuilder, Topology}
+import org.apache.kafka.streams.{KafkaStreams, StreamsBuilder, StreamsConfig, Topology}
 import spray.json.JsonParser
 
 import scala.collection.mutable.ListBuffer
@@ -39,7 +37,8 @@ class KafkaTopicsMetadataRepositoryRead(config: ApplicationConfig) extends Topic
 
   def getProps(): Properties = {
     val props = new Properties
-    props.put(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, config.kafka.bootstrapServers)
+    props.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, config.kafka.bootstrapServers)
+    props.put(StreamsConfig.APPLICATION_ID_CONFIG, "kafka-streams-client-id")
     props
   }
 

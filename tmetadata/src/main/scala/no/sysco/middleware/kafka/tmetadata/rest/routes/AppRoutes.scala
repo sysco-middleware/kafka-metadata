@@ -7,36 +7,36 @@ import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
 import akka.pattern._
 import akka.util.Timeout
-import no.sysco.middleware.kafka.tmetadata.actors.KafkaService.{FetchTopicsMetadata, FetchedTopicsMetadata, RegisterTopicMetadata, RegisteredTopicMetadataAttempt}
+import no.sysco.middleware.kafka.tmetadata.application.KafkaService
+import no.sysco.middleware.kafka.tmetadata.application.KafkaService.{FetchTopicsMetadata, FetchedTopicsMetadata, RegisterTopicMetadata, RegisteredTopicMetadataAttempt}
 import no.sysco.middleware.kafka.tmetadata.rest.{TopicMetadata, TopicVendorProtocol}
 
 import scala.concurrent.duration._ //For the timeout duratino "5 seconds"
 
 trait AppRoutes extends TopicVendorProtocol {
 
-  def log: LoggingAdapter
-  def kafkaService: ActorRef
+  def kafkaService: KafkaService
 
   implicit val timeout = Timeout(5 seconds)
 
   val appHttpRoutes: Route = path("topics") {
-    get {
-      pathEndOrSingleSlash {
-        onSuccess(kafkaService ? FetchTopicsMetadata){
-          case rez: FetchedTopicsMetadata => complete(rez.topicsMetadata)
-        }
-      }
-    } ~
+//    get {
+//      pathEndOrSingleSlash {
+//        onSuccess(kafkaService.registerTopicMeta()){
+//          case rez: FetchedTopicsMetadata => complete(rez.topicsMetadata)
+//        }
+//      }
+//    } ~
       post {
         entity(as[TopicMetadata]) { json =>
           println(json)
-          log.info("Endpoint /topics, payload: {}", json)
-          onSuccess(kafkaService ? RegisterTopicMetadata(json)){
-            case rez: RegisteredTopicMetadataAttempt => if (rez.success) {
-              complete(StatusCodes.OK)
-            } else {
-              complete(HttpResponse(StatusCodes.BadRequest, entity = HttpEntity(ContentTypes.`text/html(UTF-8)`, rez.message)))
-            }
+          onSuccess(kafkaService.registerTopicMeta(RegisterTopicMetadata(json))) {
+            rez: RegisteredTopicMetadataAttempt =>
+              if (rez.success) {
+                complete(StatusCodes.OK)
+              } else {
+                complete(HttpResponse(StatusCodes.BadRequest, entity = HttpEntity(ContentTypes.`text/html(UTF-8)`, rez.message)))
+              }
           }
         }
       }

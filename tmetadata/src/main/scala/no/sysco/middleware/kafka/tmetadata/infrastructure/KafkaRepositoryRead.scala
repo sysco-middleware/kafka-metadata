@@ -13,7 +13,7 @@ import org.apache.kafka.common.serialization.{StringDeserializer, StringSerializ
 import collection.JavaConverters._
 import scala.concurrent.ExecutionContext
 
-// todo: remove after test
+
 object KafkaRepositoryRead {
 
   val topic = Topics.METADATA

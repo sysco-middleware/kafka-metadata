@@ -9,8 +9,6 @@ object Versions {
   // observability (Logs, Metrics, Tracing)
   val prometheus    = "0.5.0"
 
-  // logger
-  val log4j_over_slf4j = "1.7.12"
 }
 
 object Dependencies {
@@ -19,7 +17,7 @@ object Dependencies {
   val akka_http_spray           = "com.typesafe.akka"   %% "akka-http-spray-json"   % Versions.akka_http
   val akka_streams              = "com.typesafe.akka"   %% "akka-stream"            % Versions.akka_streams
 
-  val log4j_over_slf4j          = "org.slf4j"           % "log4j-over-slf4j"        % Versions.log4j_over_slf4j
+
   val akka_slf4j                = "com.typesafe.akka"   %% "akka-slf4j"             % Versions.akka_streams
 
 

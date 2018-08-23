@@ -65,7 +65,6 @@ lazy val commonDependencies = Seq(
   akka_http_spray,
   kafka_clients,
   kafka_streams,
-  log4j_over_slf4j,
   akka_slf4j
 )
 lazy val observabilityDependencies = Seq(

@@ -3,8 +3,7 @@ package no.sysco.middleware.kafka.tmetadata.infrastructure
 import java.util.Properties
 
 import no.sysco.middleware.kafka.tmetadata.ApplicationConfig
-import no.sysco.middleware.kafka.tmetadata.actors.KafkaService.{RegisterTopicMetadata, RegisteredTopicMetadataAttempt}
-
+import no.sysco.middleware.kafka.tmetadata.application.KafkaService._
 import org.apache.kafka.clients.producer._
 import org.apache.kafka.common.serialization.StringSerializer
 
@@ -19,6 +18,7 @@ object KafkaTopicsMetadataRepositoryWrite {
     val kafkaProducer: KafkaProducer[String, String] = new KafkaProducer(producerProps(config))
     new KafkaTopicsMetadataRepositoryWrite(kafkaProducer, topic)
   }
+
   def producerProps(config: ApplicationConfig):Properties = {
     val props = new Properties()
     props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, config.kafka.bootstrapServers)
@@ -32,15 +32,15 @@ object KafkaTopicsMetadataRepositoryWrite {
 
 class KafkaTopicsMetadataRepositoryWrite(kafkaProducer: KafkaProducer[String, String], topic: String)(implicit executionContext: ExecutionContext) {
 
-  def registerSync(command: RegisterTopicMetadata): RegisteredTopicMetadataAttempt = {
+  def registerSync(command: RegisterTopicMetadata): Future[RegisteredTopicMetadataAttempt] = {
     val record = new ProducerRecord[String, String](topic, command.json.topicName, command.json.toString)
     try {
       kafkaProducer.send(record)
-      RegisteredTopicMetadataAttempt()
+      Future(RegisteredTopicMetadataAttempt())
     } catch {
       case e: Exception =>
         e.printStackTrace()
-        RegisteredTopicMetadataAttempt(success = false, message = e.getMessage)
+        Future(RegisteredTopicMetadataAttempt(success = false, message = e.getMessage))
     }
   }
 
