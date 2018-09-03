@@ -18,6 +18,12 @@ produces:
 paths:
   /topics:
     get:
+      parameters:
+      - in: query
+        name: p
+        required: false
+        type: integer
+        description: Page number
       description: Get all topics metadata
       produces:
       - application/json
@@ -44,12 +50,19 @@ paths:
         404:
           description: Topics metadata with given topic name is NOT found
     put:
+      consumes:
+      - application/json
       parameters:
       - in: path
         name: topic_name
         required: true
         type: string
         description: topic name
+      - in: body
+        required: true
+        name: Updated TopicMetadata
+        schema:
+          $ref: '#/definitions/TopicMetadata'
       description: Update topic's metadata by topic name
       responses:
         204:
