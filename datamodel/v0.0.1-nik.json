@@ -1,0 +1,37 @@
+{
+  "topic_name": "some-name-1-long-for-smth",
+  "description": "Short description",
+  "operational": {
+    "name":"some-name-1-long-for-smth",
+    "configs": {
+      "replication_factor":1,
+      "replica_assignment": "Other object",
+      "num_partitions": 2,
+      "key":"value"
+    },
+    "tags":["tag1", "tag2", "tag3"],
+    "category":"category-one2",
+    "sla": "tempor mollit",
+    "scope": "public",
+    "format": "json",
+    "created":123123123,
+    "modified": 123123242
+  },
+  "organizational": {
+    "producers": [
+      {
+        "name": "Other team",
+        "department": "sysco.middleware"
+      },
+      {
+        "name": "Super team",
+        "department": "sysco.middleware"
+      }
+    ],
+    "vendor": {
+      "company_name": "Sysco AS"
+    }
+  }
+}
+
+// (name=reddit_posts, internal=false, partitions=(partition=0, leader=127.0.0.1:9092 (id: 0 rack: null), replicas=127.0.0.1:9092 (id: 0 rack: null), isr=127.0.0.1:9092 (id: 0 rack: null)),(partition=1, leader=127.0.0.1:9092 (id: 0 rack: null), replicas=127.0.0.1:9092 (id: 0 rack: null), isr=127.0.0.1:9092 (id: 0 rack: null)),(partition=2, leader=127.0.0.1:9092 (id: 0 rack: null), replicas=127.0.0.1:9092 (id: 0 rack: null), isr=127.0.0.1:9092 (id: 0 rack: null)),(partition=3, leader=127.0.0.1:9092 (id: 0 rack: null), replicas=127.0.0.1:9092 (id: 0 rack: null), isr=127.0.0.1:9092 (id: 0 rack: null)),(partition=4, leader=127.0.0.1:9092 (id: 0 rack: null), replicas=127.0.0.1:9092 (id: 0 rack: null), isr=127.0.0.1:9092 (id: 0 rack: null)))

@@ -96,10 +96,10 @@ definitions:
         default: some-name-1
         description: Topic name (unique, id)
       producers:
-        type: array
         description: Teams related to topic
+        type: array
         items:
-          $ref: '#/definitions/ArrayTeams'
+          $ref: '#/definitions/Team'
       vendor:
         type: object
         description: Vendor information
@@ -119,12 +119,6 @@ definitions:
       sla:
         type: string
         description: Service level agreement
-  # 3
-  ArrayTeams:
-    type: array
-    description: Array of teams
-    items:
-      $ref: '#/definitions/Team'
 
   # 4
   Team:

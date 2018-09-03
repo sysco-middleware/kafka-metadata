@@ -1,0 +1,19 @@
+{
+  "topic_name": "some-name-1-long-for-smth",
+  "logicalName": "tweets",
+  "operational": {
+    "name":"some-name-1-long-for-smth",
+    "num_partitions": 2,
+    "replication_factor":1,
+    "replica_assignment": "Other object",
+    "configs": {
+      "key":"value"
+    }
+  },
+  "organizational": {
+    "annotations":{
+      "key":"value1"
+    }
+  }
+}
+

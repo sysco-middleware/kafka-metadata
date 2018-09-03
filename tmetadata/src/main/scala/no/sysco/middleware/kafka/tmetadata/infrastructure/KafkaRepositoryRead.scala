@@ -75,7 +75,11 @@ object KafkaAdminClientDemo {
 //    adminClient.deleteTopics(topicNames, options)
 //    adminClient.describeTopics(topicNames, options)
     val list = adminClient.listTopics(new ListTopicsOptions().timeoutMs(500).listInternal(true))
-    list.listings().get().forEach(println(_))
+    val topics = list.listings().get()
+    val topicNames = list.names().get()
+//    topics.forEach(println(_))
+    val described = adminClient.describeTopics(topicNames)
+    println(described.all().get().values().forEach(println(_)))
     // describe topic configs
 //    adminClient.describeConfigs(List(new ConfigResource(ConfigResource.Type.TOPIC, TopicConfig.CLEANUP_POLICY_CONFIG)).asJavaCollection)
 //    adminClient.alterConfigs(???)

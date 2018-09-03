@@ -1,0 +1,20 @@
+{
+  "topic_name": "some-name-1",
+  "producers": [
+    {
+      "name": "Other team",
+      "department": "sysco.middleware"
+    },
+    {
+      "name": "Super team",
+      "department": "sysco.middleware"
+    }
+  ],
+  "vendor": {
+    "company_name": "Sysco AS"
+  },
+  "format": "json",
+  "scope": "public",
+  "config": "not defined yet",
+  "sla": "tempor mollit"
+}
