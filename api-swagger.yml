@@ -1,0 +1,137 @@
+---
+swagger: "2.0"
+info:
+  version: "0.0.1-SNAPSHOT"
+  title: Kafka topic metdata. REST interface
+  termsOfService: http://swagger.io/terms/
+  contact:
+    name: Nikita Zhevnitskiy
+    email: nikita.zhevnitskiy@sysco.no
+host: localhost:3000
+basePath: /
+schemes:
+- http
+consumes:
+- application/json
+produces:
+- application/json
+paths:
+  /topics:
+    get:
+      description: Get all topics metadata
+      produces:
+      - application/json
+      responses:
+        200:
+          description: Topics metadata
+          schema:
+            $ref: '#/definitions/ArrayTopicsMetadata'
+
+  /topics/{topic_name}:
+    get:
+      parameters:
+      - in: path
+        name: topic_name
+        required: true
+        type: string
+        description: topic name
+      description: Get topic's metadata by topic name
+      responses:
+        200:
+          description: Topic metadata with given topic name
+          schema:
+            $ref: '#/definitions/TopicMetadata'
+        404:
+          description: Topics metadata with given topic name is NOT found
+    put:
+      parameters:
+      - in: path
+        name: topic_name
+        required: true
+        type: string
+        description: topic name
+      description: Update topic's metadata by topic name
+      responses:
+        204:
+          description: Topic metadata updated
+        404:
+          description: Topics metadata with given topic name is NOT found
+
+##################################################################
+#               DEFINITIONS                     ##################
+##################################################################
+definitions:
+  # 1
+  ArrayTopicsMetadata:
+    type: array
+    description: Array of topics metadata existing in kafka cluster
+    items:
+      $ref: '#/definitions/TopicMetadata'
+
+  # 2
+  TopicMetadata:
+    required:
+    - topic_name
+    - producers
+    - vendor
+    - format
+    - scope
+    - config
+    properties:
+      topic_name:
+        type: string
+        default: some-name-1
+        description: Topic name (unique, id)
+      producers:
+        type: array
+        description: Teams related to topic
+        items:
+          $ref: '#/definitions/ArrayTeams'
+      vendor:
+        type: object
+        description: Vendor information
+        $ref: '#/definitions/Vendor'
+      format:
+        type: string
+        description: Topic format. Ser/Deserialization method for topic's data (xml, json, avro, ...)
+        default: json
+      scope:
+        type: string
+        description: Topic's scope. (public, private)
+        default: public
+      config:
+        type: string
+        description: topic configuration
+        default: not defined yet
+      sla:
+        type: string
+        description: Service level agreement
+  # 3
+  ArrayTeams:
+    type: array
+    description: Array of teams
+    items:
+      $ref: '#/definitions/Team'
+
+  # 4
+  Team:
+    required:
+    - name
+    - department
+    properties:
+      name:
+        type: string
+        description: Team name (unique, id)
+        default: Super team
+      department:
+        type: string
+        description: Team's department
+        default: sysco.middleware
+
+  # 5
+  Vendor:
+    properties:
+      company_name:
+        type: string
+        description: Company name
+        default: Sysco AS
