@@ -20,13 +20,14 @@ trait AppRoutes extends TopicMetadataJsonProtocol {
   implicit val timeout = Timeout(5 seconds)
 
   val appHttpRoutes: Route = path("topics") {
-//    get {
-//      pathEndOrSingleSlash {
-//        onSuccess(kafkaService.registerTopicMeta()){
-//          case rez: FetchedTopicsMetadata => complete(rez.topicsMetadata)
-//        }
-//      }
-//    } ~
+    get {
+      pathEndOrSingleSlash {
+        onSuccess(kafkaService.topicsMeta()){
+          case rez: Seq[TopicMetadata] => complete(rez)
+          case _ => complete(StatusCodes.InternalServerError)
+        }
+      }
+    } ~
       post {
         entity(as[TopicMetadata]) { json =>
           println(json)

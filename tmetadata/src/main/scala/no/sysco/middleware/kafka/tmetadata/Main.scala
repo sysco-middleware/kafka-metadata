@@ -21,14 +21,16 @@ object Main extends App with HttpRoutes {
   val config = Config.loadConfig()
 //  val log = Logging(system, this.getClass.getName)
 
-  override def kafkaService = new KafkaTopicsMetadataService(config)
+  val service = new KafkaTopicsMetadataService(config)
+  override def kafkaService = service
 
   // Observer actor
-  val observer = system.actorOf(KafkaTopicsObserverActor.props(config, kafkaService), "kafka-topics-observer")
+  val observer = system.actorOf(KafkaTopicsObserverActor.props(config, service), "kafka-topics-observer")
 
   //Start the akka-http server and listen for http requests
   val akkaHttpServer = startAkkaHTTPServer(config.rest.host, config.rest.port)
 
+  service.startStreams()
 
 
   private def startAkkaHTTPServer(host: String, port: Int): Future[ServerBinding] = {

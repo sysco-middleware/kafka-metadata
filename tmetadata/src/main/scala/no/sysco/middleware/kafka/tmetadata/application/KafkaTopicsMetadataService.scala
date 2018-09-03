@@ -15,6 +15,8 @@ import scala.concurrent.{ExecutionContext, Future}
 trait KafkaService{
   def registerTopicMeta(command: RegisterTopicMetadata):Future[RegisteredTopicMetadataAttempt]
   def registerTopics(commands:Seq[RegisterTopicMetadata])
+  def startStreams()
+  def topicsMeta(): Future[Seq[TopicMetadata]]
 }
 
 object KafkaService {
@@ -36,9 +38,15 @@ class KafkaTopicsMetadataService(config: ApplicationConfig)(implicit executionCo
   override def registerTopicMeta(command: RegisterTopicMetadata): Future[RegisteredTopicMetadataAttempt] = kafkaRepositoryWrite.registerSync(command)
 
   override def registerTopics(commands: Seq[RegisterTopicMetadata]): Unit = kafkaRepositoryWrite.registerBatch(commands)
+
+  override def startStreams(): Unit = kafkaRepositoryRead.addShutdownHook(new CountDownLatch(1), "kafka-streams-client-id")
+
+  override def topicsMeta(): Future[Seq[TopicMetadata]] = Future(kafkaRepositoryRead.topicsMetadata())
 }
 
 class MockService(config: ApplicationConfig)(implicit executionContext: ExecutionContext) extends KafkaService {
   override def registerTopicMeta(command: RegisterTopicMetadata): Future[RegisteredTopicMetadataAttempt] = Future(RegisteredTopicMetadataAttempt()) // mock
   override def registerTopics(commands: Seq[RegisterTopicMetadata]): Unit = ???
+  override def startStreams(): Unit = ???
+  override def topicsMeta(): Future[Seq[TopicMetadata]] = ???
 }

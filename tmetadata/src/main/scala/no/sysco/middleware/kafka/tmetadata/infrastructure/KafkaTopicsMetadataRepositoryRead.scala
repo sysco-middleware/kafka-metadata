@@ -5,7 +5,6 @@ import java.util.concurrent.CountDownLatch
 
 import no.sysco.middleware.kafka.tmetadata.ApplicationConfig
 import no.sysco.middleware.kafka.tmetadata.rest.{TopicMetadata, TopicMetadataJsonProtocol}
-import org.apache.kafka.clients.admin.AdminClientConfig
 import org.apache.kafka.common.utils.Bytes
 import org.apache.kafka.streams.kstream.Materialized
 import org.apache.kafka.streams.state.{KeyValueIterator, KeyValueStore, QueryableStoreTypes, ReadOnlyKeyValueStore}
@@ -13,17 +12,18 @@ import org.apache.kafka.streams.{KafkaStreams, StreamsBuilder, StreamsConfig, To
 import spray.json.JsonParser
 
 import scala.collection.mutable.ListBuffer
+import scala.concurrent.ExecutionContext
 
 
 object KafkaTopicsMetadataRepositoryRead {
 
-  def initRepository(config: ApplicationConfig):KafkaTopicsMetadataRepositoryRead = {
+  def initRepository(config: ApplicationConfig)(implicit executionContext: ExecutionContext):KafkaTopicsMetadataRepositoryRead = {
     new KafkaTopicsMetadataRepositoryRead(config)
   }
 
 }
 
-class KafkaTopicsMetadataRepositoryRead(config: ApplicationConfig) extends TopicMetadataJsonProtocol {
+class KafkaTopicsMetadataRepositoryRead(config: ApplicationConfig)(implicit executionContext: ExecutionContext) extends TopicMetadataJsonProtocol {
   val topic = Topics.METADATA
   val storageName = Topics.METADATA_STORAGE
 
@@ -54,6 +54,7 @@ class KafkaTopicsMetadataRepositoryRead(config: ApplicationConfig) extends Topic
 
     while (it.hasNext) {
       val nextKV = it.next
+      println(nextKV.value)
       list += JsonParser(nextKV.value).convertTo[TopicMetadata]
     }
 

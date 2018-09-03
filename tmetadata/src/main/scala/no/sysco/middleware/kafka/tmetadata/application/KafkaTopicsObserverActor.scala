@@ -57,8 +57,9 @@ class KafkaTopicsObserverActor(config: ApplicationConfig, kafkaService: KafkaSer
         .collect(Collectors.toList[RegisterTopicMetadata])
         .asScala
 
-      // 3
-      // todo: handle restart
+      // 3 todo: handle restart, exclude registered topics
+
+      // 4 register topics
       kafkaService.registerTopics(commands)
 
     }
