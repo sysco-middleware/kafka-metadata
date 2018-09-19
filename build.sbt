@@ -1,16 +1,12 @@
 // Project setup
+import scalariform.formatter.preferences._
 import Dependencies._
 
-val rootPackage = "no.sysco.middleware"
-val subRootPackage = s"$rootPackage.kafka"
 val projectV = "0.0.1-SNAPSHOT"
 val scalaV = "2.12.6"
 
 // https://www.scala-sbt.org/release/docs/Basic-Def-Examples.html
 lazy val settings = Seq(
-
-  organization := s"$subRootPackage",
-  version := projectV,
   scalaVersion := scalaV,
 
   test in assembly := {},
@@ -25,7 +21,7 @@ lazy val settings = Seq(
   javacOptions ++= Seq("-source", "1.8", "-target", "1.8"),
 
   // set the initial commands when entering 'console' or 'consoleQuick', but not 'consoleProject'
-  initialCommands in console := "import no.sysco.middleware.kafka._",
+  initialCommands in console := "import no.sysco.middleware.ktm._",
 
   // only use a single thread for building
   parallelExecution := false,
@@ -39,34 +35,15 @@ lazy val settings = Seq(
 lazy val root = project
   .in(file("."))
   .settings(
-    name := "kafka",
-    organization := rootPackage,
-    version := projectV
-  )
-  .aggregate(
-    utils,
-    tmetadata
-  )
-
-lazy val tmetadata = project
-  .settings(
-    name := "tmetadata",
+    name := "ktm",
+    organization := "no.sysco.middleware.ktm",
+    version := projectV,
     settings,
     libraryDependencies ++= commonDependencies ++ observabilityDependencies ++ testDependencies,
 
-    mainClass in assembly := Some(s"$subRootPackage.tmetadata.Main"),
-    assemblyJarName in assembly := "tmetadata-fat-jar.jar"
-  )
-  .dependsOn(utils)
+    mainClass in assembly := Some(s"no.sysco.middleware.ktm.Main"),
+    assemblyJarName in assembly := "ktm-fat-jar.jar"
 
-lazy val utils = project
-  .settings(
-    name := "utils",
-    settings,
-    libraryDependencies ++= Seq(
-      kafka_clients,
-      kafka_streams
-    )
   )
 
                                       /** dependencies */
@@ -87,3 +64,8 @@ lazy val observabilityDependencies = Seq(
 lazy val testDependencies = Seq(
   scala_test
 )
+
+scalariformPreferences := scalariformPreferences.value
+  .setPreference(AlignSingleLineCaseStatements, true)
+  .setPreference(DoubleIndentConstructorArguments, true)
+  .setPreference(DanglingCloseParenthesis, Preserve)

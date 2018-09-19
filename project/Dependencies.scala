@@ -2,9 +2,9 @@ import sbt._
 
 object Versions {
   val kafka         = "1.0.0"
-  val akka_http      = "10.1.3"
-  val akka_streams   = "2.5.14"
-  val scala_test     = "3.0.4"
+  val akka_http      = "10.1.5"
+  val akka_streams   = "2.5.16"
+  val scala_test     = "3.0.5"
 
   // observability (Logs, Metrics, Tracing)
   val prometheus    = "0.5.0"
