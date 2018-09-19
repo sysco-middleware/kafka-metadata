@@ -2,16 +2,11 @@
 import scalariform.formatter.preferences._
 import Dependencies._
 
-//val rootPackage = "no.sysco.middleware"
-//val subRootPackage = s"$rootPackage.ktm"
 val projectV = "0.0.1-SNAPSHOT"
 val scalaV = "2.12.6"
 
 // https://www.scala-sbt.org/release/docs/Basic-Def-Examples.html
 lazy val settings = Seq(
-
-//  organization := s"$subRootPackage",
-//  version := projectV,
   scalaVersion := scalaV,
 
   test in assembly := {},
@@ -50,31 +45,6 @@ lazy val root = project
     assemblyJarName in assembly := "ktm-fat-jar.jar"
 
   )
-//  .aggregate(
-//    utils,
-//    tmetadata
-//  )
-
-//lazy val tmetadata = project
-//  .settings(
-//    name := "tmetadata",
-//    settings,
-//    libraryDependencies ++= commonDependencies ++ observabilityDependencies ++ testDependencies,
-//
-//    mainClass in assembly := Some(s"$subRootPackage.tmetadata.Main"),
-//    assemblyJarName in assembly := "tmetadata-fat-jar.jar"
-//  )
-//  .dependsOn(utils)
-
-//lazy val utils = project
-//  .settings(
-//    name := "utils",
-//    settings,
-//    libraryDependencies ++= Seq(
-//      kafka_clients,
-//      kafka_streams
-//    )
-//  )
 
                                       /** dependencies */
 lazy val commonDependencies = Seq(

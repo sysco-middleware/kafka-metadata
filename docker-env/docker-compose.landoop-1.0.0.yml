@@ -2,7 +2,7 @@
 version: "3"
 services:
   kafka:
-    image: landoop/fast-data-dev:1.0.0
+    image: landoop/fast-data-dev
     environment:
       ADV_HOST: 127.0.0.1         # Change to 192.168.99.100 if using Docker Toolbox
       RUNTESTS: 0                 # Disable Running tests so the cluster starts faster
