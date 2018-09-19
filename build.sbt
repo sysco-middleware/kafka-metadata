@@ -1,4 +1,5 @@
 // Project setup
+import scalariform.formatter.preferences._
 import Dependencies._
 
 val rootPackage = "no.sysco.middleware"
@@ -87,3 +88,8 @@ lazy val observabilityDependencies = Seq(
 lazy val testDependencies = Seq(
   scala_test
 )
+
+scalariformPreferences := scalariformPreferences.value
+  .setPreference(AlignSingleLineCaseStatements, true)
+  .setPreference(DoubleIndentConstructorArguments, true)
+  .setPreference(DanglingCloseParenthesis, Preserve)
