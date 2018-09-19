@@ -1,7 +1,7 @@
 package no.sysco.middleware.kafka.tmetadata.rest
 
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
-import spray.json.{DefaultJsonProtocol, RootJsonFormat}
+import spray.json.{ DefaultJsonProtocol, RootJsonFormat }
 
 //* description
 //* producers (teams)
@@ -13,28 +13,27 @@ import spray.json.{DefaultJsonProtocol, RootJsonFormat}
 
 // Validation http://fruzenshtein.com/akka-http-model-validation-field-by-field/
 final case class TopicMetadata(
-                                topicName: String,
-                                description: String = "",
-                                producers: List[Team] = List.empty[Team],
-                                topicVendor: TopicVendor = TopicVendor(),
-                                format: String = "",
-                                scope: String = "",
-                                config: String = "",
-                                sla: Option[String] = Option.empty) {
+  topicName: String,
+  description: String = "",
+  producers: List[Team] = List.empty[Team],
+  topicVendor: TopicVendor = TopicVendor(),
+  format: String = "",
+  scope: String = "",
+  config: String = "",
+  sla: Option[String] = Option.empty) {
   require(!topicName.isEmpty, "topic_name must not be empty")
 
   override def toString: String = TopicMetadataJsonProtocol.json(this)
 }
 
 final case class Team(name: String = "", department: String = "") {
-//  require(!name.isEmpty, "team.name must not be empty")
-//  require(!department.isEmpty, "team.departament must not be empty")
+  //  require(!name.isEmpty, "team.name must not be empty")
+  //  require(!department.isEmpty, "team.departament must not be empty")
 }
 
 final case class TopicVendor(companyName: String = "") {
-//  require(!companyName.isEmpty, "company_name must not be empty")
+  //  require(!companyName.isEmpty, "company_name must not be empty")
 }
-
 
 trait TopicMetadataJsonProtocol extends SprayJsonSupport with DefaultJsonProtocol {
 
@@ -51,7 +50,6 @@ trait TopicMetadataJsonProtocol extends SprayJsonSupport with DefaultJsonProtoco
       "sla")
   implicit def teamJsonFormat: RootJsonFormat[Team] = jsonFormat(Team, "name", "department")
   implicit def topicVendorJsonFormat: RootJsonFormat[TopicVendor] = jsonFormat(TopicVendor, "company_name")
-
 
 }
 

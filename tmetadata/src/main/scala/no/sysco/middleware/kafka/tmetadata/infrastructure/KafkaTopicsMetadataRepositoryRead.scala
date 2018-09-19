@@ -4,20 +4,19 @@ import java.util.Properties
 import java.util.concurrent.CountDownLatch
 
 import no.sysco.middleware.kafka.tmetadata.ApplicationConfig
-import no.sysco.middleware.kafka.tmetadata.rest.{TopicMetadata, TopicMetadataJsonProtocol}
+import no.sysco.middleware.kafka.tmetadata.rest.{ TopicMetadata, TopicMetadataJsonProtocol }
 import org.apache.kafka.common.utils.Bytes
 import org.apache.kafka.streams.kstream.Materialized
-import org.apache.kafka.streams.state.{KeyValueIterator, KeyValueStore, QueryableStoreTypes, ReadOnlyKeyValueStore}
-import org.apache.kafka.streams.{KafkaStreams, StreamsBuilder, StreamsConfig, Topology}
+import org.apache.kafka.streams.state.{ KeyValueIterator, KeyValueStore, QueryableStoreTypes, ReadOnlyKeyValueStore }
+import org.apache.kafka.streams.{ KafkaStreams, StreamsBuilder, StreamsConfig, Topology }
 import spray.json.JsonParser
 
 import scala.collection.mutable.ListBuffer
 import scala.concurrent.ExecutionContext
 
-
 object KafkaTopicsMetadataRepositoryRead {
 
-  def initRepository(config: ApplicationConfig)(implicit executionContext: ExecutionContext):KafkaTopicsMetadataRepositoryRead = {
+  def initRepository(config: ApplicationConfig)(implicit executionContext: ExecutionContext): KafkaTopicsMetadataRepositoryRead = {
     new KafkaTopicsMetadataRepositoryRead(config)
   }
 
@@ -40,11 +39,10 @@ class KafkaTopicsMetadataRepositoryRead(config: ApplicationConfig)(implicit exec
 
   def buildTopology(builder: StreamsBuilder): Topology = {
     val tMetastorage = builder.table(
-        topic,
-        Materialized.as[String, String, KeyValueStore[Bytes, Array[Byte]]](storageName))
+      topic,
+      Materialized.as[String, String, KeyValueStore[Bytes, Array[Byte]]](storageName))
     builder.build()
   }
-
 
   def topicsMetadata(): Seq[TopicMetadata] = {
     val storeType = QueryableStoreTypes.keyValueStore[String, String]()
@@ -80,7 +78,5 @@ class KafkaTopicsMetadataRepositoryRead(config: ApplicationConfig)(implicit exec
     System.exit(0)
   }
 
-
 }
-
 

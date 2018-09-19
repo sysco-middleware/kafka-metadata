@@ -1,20 +1,17 @@
 package no.sysco.middleware.kafka.tmetadata.application
 
-
 import java.util.concurrent.CountDownLatch
 
-import no.sysco.middleware.kafka.tmetadata.application.KafkaService.{RegisterTopicMetadata, RegisteredTopicMetadataAttempt}
-import no.sysco.middleware.kafka.tmetadata.infrastructure.{KafkaTopicsMetadataRepositoryRead, KafkaTopicsMetadataRepositoryWrite, Topics}
+import no.sysco.middleware.kafka.tmetadata.application.KafkaService.{ RegisterTopicMetadata, RegisteredTopicMetadataAttempt }
+import no.sysco.middleware.kafka.tmetadata.infrastructure.{ KafkaTopicsMetadataRepositoryRead, KafkaTopicsMetadataRepositoryWrite, Topics }
 import no.sysco.middleware.kafka.tmetadata.rest.TopicMetadata
-import no.sysco.middleware.kafka.tmetadata.{ApplicationConfig, Env}
+import no.sysco.middleware.kafka.tmetadata.{ ApplicationConfig, Env }
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.{ ExecutionContext, Future }
 
-
-
-trait KafkaService{
-  def registerTopicMeta(command: RegisterTopicMetadata):Future[RegisteredTopicMetadataAttempt]
-  def registerTopics(commands:Seq[RegisterTopicMetadata])
+trait KafkaService {
+  def registerTopicMeta(command: RegisterTopicMetadata): Future[RegisteredTopicMetadataAttempt]
+  def registerTopics(commands: Seq[RegisterTopicMetadata])
   def startStreams()
   def topicsMeta(): Future[Seq[TopicMetadata]]
 }
@@ -27,7 +24,7 @@ object KafkaService {
   final case class RegisteredTopicMetadataAttempt(success: Boolean = true, message: String = "") extends Event
 
   final case class FetchTopicsMetadata() extends Command
-  final case class FetchedTopicsMetadata(topicsMetadata : Seq[TopicMetadata]) extends Event
+  final case class FetchedTopicsMetadata(topicsMetadata: Seq[TopicMetadata]) extends Event
 }
 
 class KafkaTopicsMetadataService(config: ApplicationConfig)(implicit executionContext: ExecutionContext) extends KafkaService {

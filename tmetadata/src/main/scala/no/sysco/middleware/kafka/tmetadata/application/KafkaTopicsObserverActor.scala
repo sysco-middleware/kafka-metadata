@@ -3,21 +3,20 @@ package no.sysco.middleware.kafka.tmetadata.application
 import java.util.Properties
 import java.util.stream.Collectors
 
-import akka.actor.{AbstractLoggingActor, Actor, ActorLogging, Props}
+import akka.actor.{ AbstractLoggingActor, Actor, ActorLogging, Props }
 import no.sysco.middleware.kafka.tmetadata.ApplicationConfig
 import no.sysco.middleware.kafka.tmetadata.application.KafkaService.RegisterTopicMetadata
 import no.sysco.middleware.kafka.tmetadata.application.KafkaTopicsObserverActor.Initialize
 import no.sysco.middleware.kafka.tmetadata.infrastructure.Topics
-import no.sysco.middleware.kafka.tmetadata.rest.{TopicMetadata, TopicMetadataJsonProtocol}
+import no.sysco.middleware.kafka.tmetadata.rest.{ TopicMetadata, TopicMetadataJsonProtocol }
 import org.apache.kafka.clients.admin._
 import org.apache.kafka.common.errors.TopicExistsException
 import org.apache.kafka.common.requests.MetadataResponse
 
 import scala.collection.JavaConverters._
-import scala.concurrent.{ExecutionContext, ExecutionException}
+import scala.concurrent.{ ExecutionContext, ExecutionException }
 
-
-object KafkaTopicsObserverActor{
+object KafkaTopicsObserverActor {
   def props(config: ApplicationConfig, kafkaService: KafkaService)(implicit executionContext: ExecutionContext): Props = {
     Props(new KafkaTopicsObserverActor(config, kafkaService))
   }
@@ -39,15 +38,13 @@ class KafkaTopicsObserverActor(config: ApplicationConfig, kafkaService: KafkaSer
       // 1 create metadata-topics kafka topic
       createTopic(Seq(
         // todo: #Partitions & replicationFactor load from config
-        new NewTopic(Topics.METADATA, 1 ,1 )
-      ))
+        new NewTopic(Topics.METADATA, 1, 1)))
 
       // 2 list existing (not internal)
       val commands = adminClient.listTopics(
         new ListTopicsOptions()
           .timeoutMs(500)
-          .listInternal(false)
-        )
+          .listInternal(false))
         .listings()
         .get()
         .stream()
