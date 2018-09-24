@@ -5,8 +5,8 @@ import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
 import akka.util.Timeout
 import no.sysco.middleware.ktm.application.KafkaService
-import no.sysco.middleware.ktm.application.KafkaService.{RegisterTopicMetadata, RegisteredTopicMetadataAttempt}
-import no.sysco.middleware.ktm.rest.{TopicMetadata, TopicMetadataJsonProtocol}
+import no.sysco.middleware.ktm.application.KafkaService.{ RegisterTopicMetadata, RegisteredTopicMetadataAttempt }
+import no.sysco.middleware.ktm.rest.{ TopicMetadata, TopicMetadataJsonProtocol }
 
 import scala.concurrent.duration._ //For the timeout duratino "5 seconds"
 
@@ -21,7 +21,7 @@ trait AppRoutes extends TopicMetadataJsonProtocol {
       pathEndOrSingleSlash {
         onSuccess(kafkaService.topicsMeta()) {
           case rez: Seq[TopicMetadata] => complete(rez)
-          case _ => complete(StatusCodes.InternalServerError)
+          case _                       => complete(StatusCodes.InternalServerError)
         }
       }
     } ~

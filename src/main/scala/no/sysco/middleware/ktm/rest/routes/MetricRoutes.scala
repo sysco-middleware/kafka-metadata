@@ -1,9 +1,9 @@
 package no.sysco.middleware.ktm.rest.routes
 
-import java.io.{StringWriter, Writer}
+import java.io.{ StringWriter, Writer }
 
 import akka.http.scaladsl.model.HttpEntity
-import akka.http.scaladsl.server.Directives.{complete, get, path, pathEndOrSingleSlash}
+import akka.http.scaladsl.server.Directives.{ complete, get, path, pathEndOrSingleSlash }
 import io.prometheus.client.CollectorRegistry
 import io.prometheus.client.exporter.common.TextFormat
 

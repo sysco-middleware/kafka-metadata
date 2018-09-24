@@ -1,6 +1,5 @@
 package no.sysco.middleware.ktm
 
-
 import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.Http.ServerBinding
@@ -18,7 +17,7 @@ object Main extends App with HttpRoutes {
   implicit val materializer: ActorMaterializer = ActorMaterializer()
   implicit val executionContext: ExecutionContextExecutor = system.dispatcher
 
-  val config = Config.loadConfig()
+  val config = AppConfig.loadConfig()
   //  val log = Logging(system, this.getClass.getName)
 
   val service = new KafkaTopicsMetadataService(config)

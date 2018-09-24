@@ -3,17 +3,17 @@ package no.sysco.middleware.ktm.application
 import java.util.Properties
 import java.util.stream.Collectors
 
-import akka.actor.{Actor, ActorLogging, Props}
+import akka.actor.{ Actor, ActorLogging, Props }
 import no.sysco.middleware.ktm.ApplicationConfig
 import no.sysco.middleware.ktm.application.KafkaService.RegisterTopicMetadata
 import no.sysco.middleware.ktm.application.ObserverActor.Initialize
 import no.sysco.middleware.ktm.infrastructure.Topics
-import no.sysco.middleware.ktm.rest.{TopicMetadata, TopicMetadataJsonProtocol}
+import no.sysco.middleware.ktm.rest.{ TopicMetadata, TopicMetadataJsonProtocol }
 import org.apache.kafka.clients.admin._
 import org.apache.kafka.common.errors.TopicExistsException
 
 import scala.collection.JavaConverters._
-import scala.concurrent.{ExecutionContext, ExecutionException}
+import scala.concurrent.{ ExecutionContext, ExecutionException }
 
 object ObserverActor {
   def props(config: ApplicationConfig, kafkaService: KafkaService)(implicit executionContext: ExecutionContext): Props = {

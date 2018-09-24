@@ -3,11 +3,11 @@ package no.sysco.middleware.ktm.application
 import java.util.concurrent.CountDownLatch
 
 import no.sysco.middleware.ktm.ApplicationConfig
-import no.sysco.middleware.ktm.application.KafkaService.{RegisterTopicMetadata, RegisteredTopicMetadataAttempt}
-import no.sysco.middleware.ktm.infrastructure.{KafkaTopicsMetadataRepositoryRead, KafkaTopicsMetadataRepositoryWrite}
+import no.sysco.middleware.ktm.application.KafkaService.{ RegisterTopicMetadata, RegisteredTopicMetadataAttempt }
+import no.sysco.middleware.ktm.infrastructure.{ KafkaTopicsMetadataRepositoryRead, KafkaTopicsMetadataRepositoryWrite }
 import no.sysco.middleware.ktm.rest.TopicMetadata
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.{ ExecutionContext, Future }
 
 trait KafkaService {
   def registerTopicMeta(command: RegisterTopicMetadata): Future[RegisteredTopicMetadataAttempt]

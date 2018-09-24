@@ -2,9 +2,9 @@ package no.sysco.middleware.ktm.infrastructure
 
 import java.util.Properties
 
-import no.sysco.middleware.ktm.{ApplicationConfig, Config}
-import org.apache.kafka.clients.admin.{AdminClient, AdminClientConfig, ListTopicsOptions}
-import org.apache.kafka.clients.consumer.{ConsumerConfig, KafkaConsumer}
+import no.sysco.middleware.ktm.{ ApplicationConfig, AppConfig }
+import org.apache.kafka.clients.admin.{ AdminClient, AdminClientConfig, ListTopicsOptions }
+import org.apache.kafka.clients.consumer.{ ConsumerConfig, KafkaConsumer }
 import org.apache.kafka.common.serialization.StringDeserializer
 
 // todo: remove after test
@@ -36,7 +36,7 @@ class KafkaRepositoryRead(val kafkaConsumer: KafkaConsumer[String, String]) {
 }
 
 object At extends App {
-  val conf = Config.loadConfig()
+  val conf = AppConfig.loadConfig()
   val consumer = KafkaRepositoryRead.initRepository(conf)
   println(consumer.topicsList())
 }
