@@ -4,11 +4,11 @@ import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.Http.ServerBinding
 import akka.stream.ActorMaterializer
-import no.sysco.middleware.ktm.application.{KafkaTopicsMetadataService, ObserverActor}
+import no.sysco.middleware.ktm.application.{ KafkaTopicsMetadataService, ObserverActor }
 import no.sysco.middleware.ktm.rest.HttpRoutes
 
 import scala.concurrent.duration._
-import scala.concurrent.{Await, ExecutionContextExecutor, Future}
+import scala.concurrent.{ Await, ExecutionContextExecutor, Future }
 
 // TODO: Exit if no communication with Kafka
 object Main extends App with HttpRoutes {
