@@ -54,7 +54,8 @@ lazy val commonDependencies = Seq(
   akka_http_spray,
   kafka_clients,
   kafka_streams,
-  akka_slf4j
+  akka_slf4j,
+  akka_slf4j_logback
 )
 lazy val observabilityDependencies = Seq(
   prometheus_simple_client,

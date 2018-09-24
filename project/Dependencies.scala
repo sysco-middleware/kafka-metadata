@@ -1,13 +1,14 @@
 import sbt._
 
 object Versions {
-  val kafka         = "1.0.0"
-  val akka_http      = "10.1.5"
-  val akka_streams   = "2.5.16"
-  val scala_test     = "3.0.5"
+  val kafka           = "1.0.0"
+  val akka_http       = "10.1.5"
+  val akka_streams    = "2.5.16"
+  val scala_test      = "3.0.5"
+  val logback         = "1.1.3"
 
   // observability (Logs, Metrics, Tracing)
-  val prometheus    = "0.5.0"
+  val prometheus      = "0.5.0"
 
 }
 
@@ -19,6 +20,7 @@ object Dependencies {
 
 
   val akka_slf4j                = "com.typesafe.akka"   %% "akka-slf4j"             % Versions.akka_streams
+  val akka_slf4j_logback        = "ch.qos.logback"      % "logback-classic"         % Versions.logback        % Runtime
 
 
   val kafka_clients             = "org.apache.kafka"    % "kafka-clients"           % Versions.kafka
@@ -30,6 +32,6 @@ object Dependencies {
   val prometheus_hot_spot       = "io.prometheus"       % "simpleclient_hotspot"    % Versions.prometheus
 
   // test dependencies
-  val scala_test                = "org.scalatest"       %% "scalatest"              % Versions.scala_test   % Test
+  val scala_test                = "org.scalatest"       %% "scalatest"              % Versions.scala_test     % Test
 }
 

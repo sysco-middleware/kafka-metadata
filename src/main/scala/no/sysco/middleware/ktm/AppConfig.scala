@@ -11,10 +11,11 @@ case class KafkaConfig(bootstrapServers: String)
 case class RestConfig(serviceName: String, host: String, port: Int)
 case class ApplicationConfig(kafka: KafkaConfig, rest: RestConfig, env: Env.Value)
 
-object Config {
+object AppConfig {
 
   def loadConfig(): ApplicationConfig = {
-    val config = ConfigFactory.load()
+    val config = ConfigFactory.load("application.conf")
+    println(config)
     val kafka = KafkaConfig(config.getString("kafka.bootstrap-servers"))
     val rest = RestConfig(
       config.getString("service.name"),
