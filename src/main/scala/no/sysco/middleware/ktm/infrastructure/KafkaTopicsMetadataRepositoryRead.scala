@@ -5,10 +5,13 @@ import java.util.concurrent.CountDownLatch
 
 import no.sysco.middleware.ktm.ApplicationConfig
 import no.sysco.middleware.ktm.rest.{ TopicMetadata, TopicMetadataJsonProtocol }
+import org.apache.kafka.common.KafkaException
 import org.apache.kafka.common.utils.Bytes
+import org.apache.kafka.streams.errors.BrokerNotFoundException
 import org.apache.kafka.streams.kstream.Materialized
 import org.apache.kafka.streams.state.{ KeyValueIterator, KeyValueStore, QueryableStoreTypes, ReadOnlyKeyValueStore }
 import org.apache.kafka.streams.{ KafkaStreams, StreamsBuilder, StreamsConfig, Topology }
+import org.slf4j.LoggerFactory
 import spray.json.JsonParser
 
 import scala.collection.mutable.ListBuffer
@@ -23,22 +26,26 @@ object KafkaTopicsMetadataRepositoryRead {
 }
 
 class KafkaTopicsMetadataRepositoryRead(config: ApplicationConfig)(implicit executionContext: ExecutionContext) extends TopicMetadataJsonProtocol {
+  val log = LoggerFactory.getLogger(this.getClass)
+
   val topic = Topics.METADATA
   val storageName = Topics.METADATA_STORAGE
 
   val builder = new StreamsBuilder
   val topology = buildTopology(builder)
+
   val streams: KafkaStreams = new KafkaStreams(topology, getProps())
 
   def getProps(): Properties = {
     val props = new Properties
     props.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, config.kafka.bootstrapServers)
     props.put(StreamsConfig.APPLICATION_ID_CONFIG, "kafka-streams-client-id")
+    props.put(StreamsConfig.REQUEST_TIMEOUT_MS_CONFIG, s"${config.kafka.timeout}")
     props
   }
 
   def buildTopology(builder: StreamsBuilder): Topology = {
-    val tMetastorage = builder.table(
+    val tMetaStorage = builder.table(
       topic,
       Materialized.as[String, String, KeyValueStore[Bytes, Array[Byte]]](storageName))
     builder.build()
@@ -72,8 +79,10 @@ class KafkaTopicsMetadataRepositoryRead(config: ApplicationConfig)(implicit exec
       streams.start()
       latch.await()
     } catch {
-      case e: Throwable =>
+      case e1: Throwable => {
+        log.error("\n\nUnable to connect to kafka bootstrap-server\n\n")
         System.exit(1)
+      }
     }
     System.exit(0)
   }
