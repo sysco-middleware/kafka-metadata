@@ -1,22 +1,35 @@
 package no.sysco.middleware.kafka.metadata.collector.topic.internal
 
+import java.time.Duration
+
 import akka.actor.{Actor, ActorRef, Props}
-import no.sysco.middleware.kafka.metadata.collector.proto.topic.TopicEventPb
-import org.apache.kafka.clients.admin.TopicDescription
+import no.sysco.middleware.kafka.metadata.collector.proto.topic.{TopicCreatedPb, TopicDeletedPb, TopicEventPb, TopicUpdatedPb}
+
+import scala.concurrent.ExecutionContext
 
 object TopicManager {
-  def props(topicRepository: ActorRef): Props = Props(new TopicManager(topicRepository))
+  def props(pollFrequency: Duration, topicRepository: ActorRef, topicEventProducer: ActorRef): Props =
+    Props(new TopicManager(pollFrequency, topicRepository, topicEventProducer))
 }
 
-class TopicManager(topicRepository: ActorRef) extends Actor {
+class TopicManager(pollFrequency: Duration, topicRepository: ActorRef, topicEventProducer: ActorRef) extends Actor {
 
-  var topicsAndDescription: Map[String, Option[TopicDescription]] = Map()
+  implicit val executionContext: ExecutionContext = context.dispatcher
+
+  var topicsAndDescription: Map[String, Option[Description]] = Map()
+
+  def evaluateCurrentTopics(names: List[String]): Unit = {
+    topicsAndDescription.keys.toList match {
+      case Nil =>
+      case name :: ns =>
+        if (!names.contains(name)) topicEventProducer ! TopicEventPb(name, TopicEventPb.Event(TopicDeletedPb()))
+        evaluateCurrentTopics(ns)
+    }
+  }
 
   def handleTopicsCollected(topicsCollected: TopicsCollected): Unit = {
-    topicsCollected.names match {
-      case Nil =>
-      case (name :: names) if topicsAndDescription.keys.exists(_.equals(name)) =>
-    }
+    evaluateCurrentTopics(topicsCollected.names)
+    evaluateTopicsCollected(topicsCollected.names)
   }
 
   def evaluateTopicsCollected(topicNames: List[String]): Unit = topicNames match {
@@ -24,47 +37,55 @@ class TopicManager(topicRepository: ActorRef) extends Actor {
     case name :: names =>
       name match {
         case n if !topicsAndDescription.keys.exists(_.equals(n)) =>
+          topicEventProducer ! TopicEventPb(name, TopicEventPb.Event(TopicCreatedPb()))
         case n if topicsAndDescription.keys.exists(_.equals(n)) =>
+          topicRepository ! DescribeTopic(name)
       }
+      evaluateTopicsCollected(names)
   }
 
   def handleTopicEvent(topicEvent: TopicEventPb): Unit =
     topicEvent.event match {
       case event: Event if event.isTopicCreated =>
         event.topicCreated match {
-          case Some(topicCreated) =>
-            topicRepository ! DescribeTopics(List(topicEvent.name))
+          case Some(_) =>
+            topicRepository ! DescribeTopic(topicEvent.name)
             topicsAndDescription = topicsAndDescription + (topicEvent.name -> None)
         }
       case event: Event if event.isTopicUpdated =>
         event.topicUpdated match {
           case Some(topicUpdated) =>
-            val topicDescription = Some(Parser.parsePb(topicEvent.name, topicUpdated.topicDescription.get))
+            val topicDescription = Some(Parser.fromPb(topicEvent.name, topicUpdated.topicDescription.get))
             topicsAndDescription = topicsAndDescription + (topicEvent.name -> topicDescription)
         }
 
       case event: Event if event.isTopicDeleted =>
         event.topicDeleted match {
-          case Some(topicDeleted) =>
+          case Some(_) =>
             topicsAndDescription = topicsAndDescription - topicEvent.name
         }
     }
 
-  def handleTopicsDescribed(topicsDescribed: TopicsDescribed): Unit =
-    evaluateTopicAndDescription(topicsDescribed.topicsAndDescription.toList)
+  def handleTopicDescribed(topicDescribed: TopicDescribed): Unit = topicDescribed.topicAndDescription match {
+    case (name: String, description: Description) =>
+      topicsAndDescription(name) match {
+        case currentTopicDescription =>
+          if (!currentTopicDescription.get.equals(description))
+            topicEventProducer ! TopicEventPb(name, TopicEventPb.Event(TopicUpdatedPb()))
+      }
+  }
 
-  def evaluateTopicAndDescription(topicsAndDescription: List[(String, TopicDescription)]) =
-    topicsAndDescription match {
-      case (name, topicDescription) :: ts =>
-        this.topicsAndDescription.get(name) match {
-          case Some(t) => ??? //if (!t.equals(topicDescription))
-        }
-    }
+  def handleCollectTopics(): Unit = {
+    topicRepository ! CollectTopics()
+
+    context.system.scheduler.scheduleOnce(pollFrequency, () => self ! CollectTopics())
+  }
 
   override def receive: Receive = {
     case topicsCollected: TopicsCollected => handleTopicsCollected(topicsCollected)
-    case topicsDescribed: TopicsDescribed => handleTopicsDescribed(topicsDescribed)
+    case topicDescribed: TopicDescribed => handleTopicDescribed(topicDescribed)
     case topicEvent: TopicEventPb => handleTopicEvent(topicEvent)
+    case CollectTopics => handleCollectTopics()
   }
 
 }

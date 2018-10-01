@@ -24,9 +24,7 @@ message TopicUpdatedPb {
 message TopicDescriptionPb {
     message TopicPartitionInfoPb {
         int32 partition = 1;
-        NodePb leader = 2;
-        repeated NodePb replicas = 3;
-        repeated NodePb isr = 4;
+        repeated NodePb replicas = 2;
     }
 
     bool internal = 1;

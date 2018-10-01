@@ -1,7 +1,7 @@
 package no.sysco.middleware.kafka.metadata.collector.topic.internal
 
 import akka.NotUsed
-import akka.actor.Actor
+import akka.actor.{Actor, Props}
 import akka.kafka.ProducerSettings
 import akka.kafka.scaladsl.Producer
 import akka.stream.ActorMaterializer
@@ -10,6 +10,10 @@ import com.typesafe.config.{Config, ConfigFactory}
 import no.sysco.middleware.kafka.metadata.collector.proto.topic.TopicEventPb
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.apache.kafka.common.serialization.{ByteArraySerializer, StringSerializer}
+
+object TopicEventProducer {
+  def props()(implicit materializer: ActorMaterializer) = Props(new TopicEventProducer())
+}
 
 class TopicEventProducer(implicit materializer: ActorMaterializer) extends Actor {
 
@@ -25,7 +29,7 @@ class TopicEventProducer(implicit materializer: ActorMaterializer) extends Actor
           "topic",
           topicEvent.name,
           topicEvent.toByteArray))
-        .to(Producer.plainSink(producerSettings))
+      .to(Producer.plainSink(producerSettings))
 
   def handleTopicEvent(topicEvent: TopicEventPb): Unit = {
     Source.single(topicEvent)

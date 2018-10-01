@@ -1,12 +1,19 @@
 package no.sysco.middleware.kafka.metadata.collector.topic.internal
 
-import akka.actor.{ Actor, Props }
-import org.apache.kafka.clients.admin.AdminClient
+import java.util.Properties
+
+import akka.actor.{Actor, Props}
+import org.apache.kafka.clients.admin.{AdminClient, AdminClientConfig}
 
 import scala.collection.JavaConverters._
 
 object TopicRepository {
   def props(adminClient: AdminClient): Props = Props(new TopicRepository(adminClient))
+  def props(bootstrapServers: String): Props = {
+    val adminConfigs = new Properties()
+    adminConfigs.setProperty(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers)
+    Props(new TopicRepository(AdminClient.create(adminConfigs)))
+  }
 }
 
 class TopicRepository(adminClient: AdminClient) extends Actor {
@@ -17,17 +24,17 @@ class TopicRepository(adminClient: AdminClient) extends Actor {
       .thenApply(names => sender() ! TopicsCollected(names.asScala.toList))
   }
 
-  def handleDescribeTopics(describeTopics: DescribeTopics): Unit = {
-    adminClient.describeTopics(describeTopics.names.asJava)
+  def handleDescribeTopic(describeTopic: DescribeTopic): Unit = {
+    adminClient.describeTopics(List(describeTopic.name).asJava)
       .all()
       .thenApply(topicsAndDescription => {
-        sender() ! TopicsDescribed(topicsAndDescription.asScala.toMap)
+        sender ! TopicDescribed(describeTopic.name, Parser.fromKafka(topicsAndDescription.get(describeTopic.name)))
       })
   }
 
   override def receive: Receive = {
     case CollectTopics => handleCollectTopics()
-    case describeTopics: DescribeTopics => handleDescribeTopics(describeTopics)
+    case describeTopics: DescribeTopic => handleDescribeTopic(describeTopics)
   }
 
 }
