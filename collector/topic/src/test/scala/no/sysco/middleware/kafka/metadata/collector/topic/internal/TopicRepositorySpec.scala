@@ -25,8 +25,8 @@ class TopicRepositorySpec
   val kafkaConfig: EmbeddedKafkaConfig = EmbeddedKafkaConfig(kafkaPort = 0, zooKeeperPort = 0)
 
 
-  "Topic Repository actor" must {
-    "send back topic Described" in {
+  "Topic Repository" must {
+    "send back topic and description" in {
       withRunningKafkaOnFoundPort(kafkaConfig) { implicit actualConfig =>
         val adminConfigs = new Properties()
         adminConfigs.setProperty(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, s"localhost:${actualConfig.kafkaPort}")

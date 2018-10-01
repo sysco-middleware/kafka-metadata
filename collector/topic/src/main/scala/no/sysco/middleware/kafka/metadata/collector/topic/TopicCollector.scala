@@ -23,10 +23,14 @@ class TopicCollector(system: ActorSystem) {
   val config: Config = ConfigFactory.load()
   val appConfig: TopicCollectorConfig = new TopicCollectorConfig(config)
 
-  val topicEventProducer: ActorRef = system.actorOf(TopicEventProducer.props())
-  val topicRepository: ActorRef = system.actorOf(TopicRepository.props(appConfig.Kafka.bootstrapServers))
-  val topicManager: ActorRef = system.actorOf(TopicManager.props(appConfig.Collector.pollFrequency, topicRepository, topicEventProducer))
-  val topicEventConsumer: ActorRef = system.actorOf(TopicEventConsumer.props(topicManager))
+  val topicEventProducer: ActorRef =
+    system.actorOf(TopicEventProducer.props(appConfig.Collector.topicEventTopic, appConfig.Kafka.bootstrapServers))
+  val topicRepository: ActorRef =
+    system.actorOf(TopicRepository.props(appConfig.Kafka.bootstrapServers))
+  val topicManager: ActorRef =
+    system.actorOf(TopicManager.props(appConfig.Collector.pollFrequency, topicRepository, topicEventProducer))
+  val topicEventConsumer: ActorRef =
+    system.actorOf(TopicEventConsumer.props(topicManager))
 
   topicManager ! CollectTopics
 }
