@@ -12,6 +12,12 @@ object TopicManager {
     Props(new TopicManager(pollFrequency, topicRepository, topicEventProducer))
 }
 
+/**
+  * Observe and publish Topic events.
+  * @param pollFrequency Frequency to poll topics from a Kafka Cluster.
+  * @param topicRepository Reference to Repository to poll data from.
+  * @param topicEventProducer Reference to Producer to publish events to.
+  */
 class TopicManager(pollFrequency: Duration, topicRepository: ActorRef, topicEventProducer: ActorRef) extends Actor {
 
   implicit val executionContext: ExecutionContext = context.dispatcher

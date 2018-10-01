@@ -16,6 +16,10 @@ object TopicRepository {
   }
 }
 
+/**
+  * Query Topics and details from a Kafka cluster.
+  * @param adminClient Client to connect to a Kafka Cluster.
+  */
 class TopicRepository(adminClient: AdminClient) extends Actor {
 
   def handleCollectTopics(): Unit = {

@@ -12,6 +12,9 @@ object TopicCollector {
   new TopicCollector(system)
 }
 
+/**
+  * Collect Topic events by observing changes a Kafka Cluster.
+  */
 class TopicCollector(system: ActorSystem) {
 
   implicit val executionContext: ExecutionContext = system.dispatcher

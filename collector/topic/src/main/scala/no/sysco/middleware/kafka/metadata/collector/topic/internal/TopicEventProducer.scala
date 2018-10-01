@@ -15,6 +15,9 @@ object TopicEventProducer {
   def props()(implicit materializer: ActorMaterializer) = Props(new TopicEventProducer())
 }
 
+/**
+  * Publish Topic events.
+  */
 class TopicEventProducer(implicit materializer: ActorMaterializer) extends Actor {
 
   val config: Config = ConfigFactory.load() //TODO

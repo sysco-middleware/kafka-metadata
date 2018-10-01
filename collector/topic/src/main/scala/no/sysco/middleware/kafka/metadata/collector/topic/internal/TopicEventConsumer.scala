@@ -15,7 +15,12 @@ object TopicEventConsumer {
     Props(new TopicEventConsumer(topicManager))
 }
 
-class TopicEventConsumer(topicManager: ActorRef)(implicit materializer: ActorMaterializer) extends Actor {
+/**
+  * Consume Topic events.
+  * @param topicManager Reference to Topic Manager, to consume events further.
+  */
+class TopicEventConsumer(topicManager: ActorRef)(implicit materializer: ActorMaterializer)
+  extends Actor {
 
   val config: Config = ConfigFactory.load() //TODO fix
 
@@ -32,5 +37,6 @@ class TopicEventConsumer(topicManager: ActorRef)(implicit materializer: ActorMat
       .to(Sink.ignore)
       .run()(materializer)
 
-  override def receive: Receive = ???
+  override def receive: Receive = _
+
 }
