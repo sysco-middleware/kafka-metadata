@@ -23,24 +23,25 @@ object TopicRepository {
 class TopicRepository(adminClient: AdminClient) extends Actor {
 
   def handleCollectTopics(): Unit = {
+    val thisSender = sender()
     adminClient.listTopics()
       .names()
-      .thenApply(names => {
-        sender() ! TopicsCollected(names.asScala.toList)
-      })
+      .thenApply(names => thisSender ! TopicsCollected(names.asScala.toList))
   }
 
   def handleDescribeTopic(describeTopic: DescribeTopic): Unit = {
+    val thisSender = sender()
     adminClient.describeTopics(List(describeTopic.name).asJava)
       .all()
-      .thenApply(topicsAndDescription => {
-        sender ! TopicDescribed(describeTopic.name, Parser.fromKafka(topicsAndDescription.get(describeTopic.name)))
-      })
+      .thenApply(topicsAndDescription =>
+        thisSender !
+          TopicDescribed(
+            describeTopic.name,
+            Parser.fromKafka(topicsAndDescription.get(describeTopic.name))))
   }
 
   override def receive: Receive = {
     case CollectTopics() => handleCollectTopics()
     case describeTopics: DescribeTopic => handleDescribeTopic(describeTopics)
   }
-
 }

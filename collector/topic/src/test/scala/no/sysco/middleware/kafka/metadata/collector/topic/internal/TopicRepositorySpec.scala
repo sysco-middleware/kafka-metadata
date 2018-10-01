@@ -1,45 +1,58 @@
 package no.sysco.middleware.kafka.metadata.collector.topic.internal
 
+import java.util.Properties
+
 import akka.actor.ActorSystem
 import akka.testkit.{ImplicitSender, TestKit}
-import org.apache.kafka.clients.admin.{MockAdminClient, TopicDescription}
-import org.apache.kafka.common.{PartitionInfo, TopicPartitionInfo}
+import net.manub.embeddedkafka.{EmbeddedKafka, EmbeddedKafkaConfig}
+import org.apache.kafka.clients.admin.{AdminClient, AdminClientConfig, NewTopic}
 import org.scalatest.{BeforeAndAfterAll, Matchers, WordSpecLike}
 
 import scala.collection.JavaConverters._
 
-class TopicRepositorySpec extends TestKit(ActorSystem("test-topic-repository")) with ImplicitSender
-  with WordSpecLike with Matchers with BeforeAndAfterAll {
+class TopicRepositorySpec
+  extends TestKit(ActorSystem("test-topic-repository"))
+    with ImplicitSender
+    with WordSpecLike
+    with Matchers
+    with BeforeAndAfterAll
+    with EmbeddedKafka {
 
   override def afterAll: Unit = {
     TestKit.shutdownActorSystem(system)
   }
 
+  val kafkaConfig: EmbeddedKafkaConfig = EmbeddedKafkaConfig(kafkaPort = 0, zooKeeperPort = 0)
+
+
   "Topic Repository actor" must {
-    "send back topics collected" in {
-      val repo = system.actorOf(TopicRepository.props(MockAdminClient(List("topic"))))
-      repo ! CollectTopics()
-      expectMsg(TopicsCollected(List("topic")))
-    }
     "send back topic Described" in {
-      val node = new org.apache.kafka.common.Node(0, "localhost", 9092, null)
-      val topicDescription =
-        new TopicDescription(
-          "topic",
-          false,
-          List(
-            new TopicPartitionInfo(
-              0,
-              node,
-              List(node).asJava,
-              List(node).asJava)).asJava)
+      withRunningKafkaOnFoundPort(kafkaConfig) { implicit actualConfig =>
+        val adminConfigs = new Properties()
+        adminConfigs.setProperty(AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, s"localhost:${actualConfig.kafkaPort}")
+        val adminClient = AdminClient.create(adminConfigs)
 
-      val repo = system.actorOf(TopicRepository.props(
-        MockAdminClient(
-          topicDescription)))
+        adminClient
+          .createTopics(
+            List(
+              new NewTopic("test-1", 1, 1),
+              new NewTopic("test-2", 1, 1),
+              new NewTopic("test-3", 1, 1),
+            ).asJava).all().get()
 
-      repo ! DescribeTopic("topic")
-      expectMsg(TopicDescribed("topic", Parser.fromKafka(topicDescription)))
+        val repo = system.actorOf(TopicRepository.props(adminClient))
+
+        repo ! CollectTopics()
+        val topicsCollected: TopicsCollected = expectMsgType[TopicsCollected]
+        assert(topicsCollected.names.size == 3)
+        assert(topicsCollected.names.contains("test-1"))
+        assert(topicsCollected.names.contains("test-2"))
+        assert(topicsCollected.names.contains("test-3"))
+
+        repo ! DescribeTopic("test-1")
+        val topicDescribed: TopicDescribed = expectMsgType[TopicDescribed]
+        assert(topicDescribed.topicAndDescription._1.equals("test-1"))
+      }
     }
   }
 }

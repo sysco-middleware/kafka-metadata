@@ -84,7 +84,9 @@ lazy val observabilityDependencies = Seq(
   prometheus_hot_spot
 )
 lazy val testDependencies = Seq(
-  scala_test
+  scala_test,
+  akka_test_kit,
+  "net.manub" %% "scalatest-embedded-kafka" % "2.0.0" % "test"
 )
 
 PB.targets in Compile := Seq(
