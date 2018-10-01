@@ -28,7 +28,8 @@ class TopicManager(pollFrequency: Duration, topicRepository: ActorRef, topicEven
     topicsAndDescription.keys.toList match {
       case Nil =>
       case name :: ns =>
-        if (!names.contains(name)) topicEventProducer ! TopicEventPb(name, TopicEventPb.Event(TopicDeletedPb()))
+        if (!names.contains(name))
+          topicEventProducer ! TopicEventPb(name, TopicEventPb.Event.TopicDeleted(TopicDeletedPb()))
         evaluateCurrentTopics(ns)
     }
   }
@@ -43,7 +44,7 @@ class TopicManager(pollFrequency: Duration, topicRepository: ActorRef, topicEven
     case name :: names =>
       name match {
         case n if !topicsAndDescription.keys.exists(_.equals(n)) =>
-          topicEventProducer ! TopicEventPb(name, TopicEventPb.Event(TopicCreatedPb()))
+          topicEventProducer ! TopicEventPb(name, TopicEventPb.Event.TopicCreated(TopicCreatedPb()))
         case n if topicsAndDescription.keys.exists(_.equals(n)) =>
           topicRepository ! DescribeTopic(name)
       }
@@ -77,7 +78,7 @@ class TopicManager(pollFrequency: Duration, topicRepository: ActorRef, topicEven
       topicsAndDescription(name) match {
         case currentTopicDescription =>
           if (!currentTopicDescription.get.equals(description))
-            topicEventProducer ! TopicEventPb(name, TopicEventPb.Event(TopicUpdatedPb()))
+            topicEventProducer ! TopicEventPb(name, TopicEventPb.Event.TopicUpdated(TopicUpdatedPb()))
       }
   }
 
@@ -91,7 +92,7 @@ class TopicManager(pollFrequency: Duration, topicRepository: ActorRef, topicEven
     case topicsCollected: TopicsCollected => handleTopicsCollected(topicsCollected)
     case topicDescribed: TopicDescribed => handleTopicDescribed(topicDescribed)
     case topicEvent: TopicEventPb => handleTopicEvent(topicEvent)
-    case CollectTopics => handleCollectTopics()
+    case CollectTopics() => handleCollectTopics()
   }
 
 }

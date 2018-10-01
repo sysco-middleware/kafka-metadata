@@ -12,7 +12,7 @@ case class TopicsCollected(names: List[String]) extends Event
 
 case class DescribeTopic(name: String) extends Command
 
-case class TopicDescribed(topicAndDescription: (String, Description)) extends
+case class TopicDescribed(topicAndDescription: (String, Description)) extends State
 
 case class Description(internal: Boolean, partitions: Seq[Partition]) extends State
 

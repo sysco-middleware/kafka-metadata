@@ -25,7 +25,9 @@ class TopicRepository(adminClient: AdminClient) extends Actor {
   def handleCollectTopics(): Unit = {
     adminClient.listTopics()
       .names()
-      .thenApply(names => sender() ! TopicsCollected(names.asScala.toList))
+      .thenApply(names => {
+        sender() ! TopicsCollected(names.asScala.toList)
+      })
   }
 
   def handleDescribeTopic(describeTopic: DescribeTopic): Unit = {
@@ -37,7 +39,7 @@ class TopicRepository(adminClient: AdminClient) extends Actor {
   }
 
   override def receive: Receive = {
-    case CollectTopics => handleCollectTopics()
+    case CollectTopics() => handleCollectTopics()
     case describeTopics: DescribeTopic => handleDescribeTopic(describeTopics)
   }
 

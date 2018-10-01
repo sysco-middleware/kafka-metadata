@@ -37,6 +37,8 @@ class TopicEventConsumer(topicManager: ActorRef)(implicit materializer: ActorMat
       .to(Sink.ignore)
       .run()(materializer)
 
-  override def receive: Receive = _
+  override def receive: Receive = {
+    case "" => ""
+  }
 
 }
