@@ -29,8 +29,8 @@ class TopicCollector(system: ActorSystem) {
     system.actorOf(TopicRepository.props(appConfig.Kafka.bootstrapServers))
   val topicManager: ActorRef =
     system.actorOf(TopicManager.props(appConfig.Collector.pollFrequency, topicRepository, topicEventProducer))
-  val topicEventConsumer: ActorRef =
-    system.actorOf(TopicEventConsumer.props(topicManager))
+  val topicEventConsumer: TopicEventConsumer =
+    TopicEventConsumer(topicManager, appConfig.Collector.topicEventTopic, appConfig.Kafka.bootstrapServers)
 
   topicManager ! CollectTopics
 }

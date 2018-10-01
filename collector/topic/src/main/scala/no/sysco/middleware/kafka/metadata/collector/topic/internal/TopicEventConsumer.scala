@@ -1,6 +1,6 @@
 package no.sysco.middleware.kafka.metadata.collector.topic.internal
 
-import akka.actor.{Actor, ActorRef, Props}
+import akka.actor.ActorRef
 import akka.kafka.scaladsl.Consumer
 import akka.kafka.{ConsumerSettings, Subscriptions}
 import akka.stream.ActorMaterializer
@@ -11,34 +11,30 @@ import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.common.serialization.{ByteArrayDeserializer, StringDeserializer}
 
 object TopicEventConsumer {
-  def props(topicManager: ActorRef)(implicit materializer: ActorMaterializer): Props =
-    Props(new TopicEventConsumer(topicManager))
+  def apply(topicManager: ActorRef, topicEventTopic: String, bootstrapServers: String)(implicit materializer: ActorMaterializer): TopicEventConsumer =
+    new TopicEventConsumer(topicManager, topicEventTopic, bootstrapServers)
 }
 
 /**
   * Consume Topic events.
   * @param topicManager Reference to Topic Manager, to consume events further.
   */
-class TopicEventConsumer(topicManager: ActorRef)(implicit materializer: ActorMaterializer)
-  extends Actor {
+class TopicEventConsumer(topicManager: ActorRef, topicEventTopic: String, bootstrapServers: String)(implicit materializer: ActorMaterializer) {
 
-  val config: Config = ConfigFactory.load() //TODO fix
+  val config: Config = ConfigFactory.load()
 
   val consumerSettings: ConsumerSettings[String, Array[Byte]] =
     ConsumerSettings(config, new StringDeserializer, new ByteArrayDeserializer)
-      .withBootstrapServers("localhost:9092")
-      .withGroupId("group1")
+      .withBootstrapServers(bootstrapServers)
+      .withGroupId("kafka-metadata-collector-topic-internal-consumer")
+      .withProperty(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, "false")
       .withProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest")
 
   val consumerSource: Consumer.Control =
-    Consumer.plainSource(consumerSettings, Subscriptions.topics("topic"))
+    Consumer.plainSource(consumerSettings, Subscriptions.topics(topicEventTopic))
       .map(record => TopicEventPb.parseFrom(record.value()))
       .map(topicEvent => topicManager ! topicEvent)
       .to(Sink.ignore)
       .run()(materializer)
-
-  override def receive: Receive = {
-    case "" => ""
-  }
 
 }

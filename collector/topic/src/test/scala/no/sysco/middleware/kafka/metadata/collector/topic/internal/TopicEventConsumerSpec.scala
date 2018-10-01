@@ -1,14 +1,13 @@
 package no.sysco.middleware.kafka.metadata.collector.topic.internal
 
 import akka.actor.ActorSystem
+import akka.stream.ActorMaterializer
 import akka.testkit.{ImplicitSender, TestKit}
 import net.manub.embeddedkafka.{EmbeddedKafka, EmbeddedKafkaConfig}
-import no.sysco.middleware.kafka.metadata.collector.proto.topic.{TopicCreatedPb, TopicEventPb}
-import org.apache.kafka.common.serialization.ByteArrayDeserializer
 import org.scalatest.{BeforeAndAfterAll, Matchers, WordSpecLike}
 
-class TopicEventProducerSpec
-  extends TestKit(ActorSystem("test-topic-event-producer"))
+class TopicEventConsumerSpec
+  extends TestKit(ActorSystem("test-topic-event-consumer"))
     with ImplicitSender
     with WordSpecLike
     with Matchers
@@ -19,6 +18,8 @@ class TopicEventProducerSpec
     TestKit.shutdownActorSystem(system)
   }
 
+  implicit val materializer: ActorMaterializer = ActorMaterializer()
+
   val kafkaConfig: EmbeddedKafkaConfig = EmbeddedKafkaConfig(kafkaPort = 0, zooKeeperPort = 0)
 
 
@@ -27,13 +28,6 @@ class TopicEventProducerSpec
       withRunningKafkaOnFoundPort(kafkaConfig) { implicit actualConfig =>
         val bootstrapServers = s"localhost:${actualConfig.kafkaPort}"
 
-        val eventProducer = system.actorOf(TopicEventProducer.props("__topic", bootstrapServers))
-
-        val topicEvent = TopicEventPb("test", TopicEventPb.Event.TopicCreated(TopicCreatedPb()))
-        eventProducer ! topicEvent
-
-        val message = consumeFirstMessageFrom("__topic")(actualConfig, valueDeserializer = new ByteArrayDeserializer())
-        assert(topicEvent.equals(TopicEventPb.parseFrom(message)))
       }
     }
   }
