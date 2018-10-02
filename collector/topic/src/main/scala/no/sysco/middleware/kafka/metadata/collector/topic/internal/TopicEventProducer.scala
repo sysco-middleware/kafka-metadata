@@ -2,14 +2,14 @@ package no.sysco.middleware.kafka.metadata.collector.topic.internal
 
 import java.util.Properties
 
-import akka.actor.{Actor, Props}
+import akka.actor.{ Actor, Props }
 import no.sysco.middleware.kafka.metadata.collector.proto.topic.TopicEventPb
-import org.apache.kafka.clients.producer.{KafkaProducer, Producer, ProducerConfig, ProducerRecord}
-import org.apache.kafka.common.serialization.{ByteArraySerializer, StringSerializer}
+import org.apache.kafka.clients.producer.{ KafkaProducer, Producer, ProducerConfig, ProducerRecord }
+import org.apache.kafka.common.serialization.{ ByteArraySerializer, StringSerializer }
 
 object TopicEventProducer {
 
-  def props(topicEventTopic: String, bootstrapServers: String): Props = {
+  def props(bootstrapServers: String, topicEventTopic: String): Props = {
     val producerConfigs = new Properties()
     producerConfigs.setProperty(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers)
     producerConfigs.setProperty(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, new StringSerializer().getClass.getName)
@@ -23,15 +23,18 @@ object TopicEventProducer {
 }
 
 /**
-  * Publish Topic events.
-  */
+ * Publish Topic events.
+ */
 class TopicEventProducer(topicEventTopic: String, producer: Producer[String, Array[Byte]]) extends Actor {
 
   def handleTopicEvent(topicEvent: TopicEventPb): Unit = {
-    producer.send(new ProducerRecord(topicEventTopic, topicEvent.name, topicEvent.toByteArray))
+    val byteArray = topicEvent.toByteArray
+    producer.send(new ProducerRecord(topicEventTopic, topicEvent.name, byteArray)).get()
   }
 
   override def receive: Receive = {
     case topicEvent: TopicEventPb => handleTopicEvent(topicEvent)
   }
+
+  override def postStop(): Unit = producer.close()
 }

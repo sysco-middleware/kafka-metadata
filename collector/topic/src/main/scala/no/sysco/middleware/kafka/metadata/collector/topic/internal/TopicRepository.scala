@@ -2,8 +2,8 @@ package no.sysco.middleware.kafka.metadata.collector.topic.internal
 
 import java.util.Properties
 
-import akka.actor.{Actor, Props}
-import org.apache.kafka.clients.admin.{AdminClient, AdminClientConfig}
+import akka.actor.{ Actor, ActorRef, Props }
+import org.apache.kafka.clients.admin.{ AdminClient, AdminClientConfig }
 
 import scala.collection.JavaConverters._
 
@@ -17,20 +17,21 @@ object TopicRepository {
 }
 
 /**
-  * Query Topics and details from a Kafka cluster.
-  * @param adminClient Client to connect to a Kafka Cluster.
-  */
+ * Query Topics and details from a Kafka cluster.
+ *
+ * @param adminClient Client to connect to a Kafka Cluster.
+ */
 class TopicRepository(adminClient: AdminClient) extends Actor {
 
   def handleCollectTopics(): Unit = {
-    val thisSender = sender()
+    val thisSender: ActorRef = sender()
     adminClient.listTopics()
       .names()
       .thenApply(names => thisSender ! TopicsCollected(names.asScala.toList))
   }
 
   def handleDescribeTopic(describeTopic: DescribeTopic): Unit = {
-    val thisSender = sender()
+    val thisSender: ActorRef = sender()
     adminClient.describeTopics(List(describeTopic.name).asJava)
       .all()
       .thenApply(topicsAndDescription =>

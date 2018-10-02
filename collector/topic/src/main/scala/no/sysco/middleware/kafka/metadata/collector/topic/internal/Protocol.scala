@@ -1,18 +1,18 @@
 package no.sysco.middleware.kafka.metadata.collector.topic.internal
 
-trait State
+sealed trait State
 
-trait Event
+sealed trait Event
 
-trait Command
+sealed trait Command
 
 case class CollectTopics() extends Command
 
-case class TopicsCollected(names: List[String]) extends Event
-
 case class DescribeTopic(name: String) extends Command
 
-case class TopicDescribed(topicAndDescription: (String, Description)) extends State
+case class TopicsCollected(names: List[String]) extends Event
+
+case class TopicDescribed(topicAndDescription: (String, Description)) extends Event
 
 case class Description(internal: Boolean, partitions: Seq[Partition]) extends State
 

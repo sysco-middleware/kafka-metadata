@@ -2,40 +2,46 @@ package no.sysco.middleware.kafka.metadata.collector.topic.internal
 
 import java.time.Duration
 
-import akka.actor.{Actor, ActorRef, Props}
-import no.sysco.middleware.kafka.metadata.collector.proto.topic.{TopicCreatedPb, TopicDeletedPb, TopicEventPb, TopicUpdatedPb}
+import akka.actor.{ Actor, ActorRef, Props }
+import akka.stream.ActorMaterializer
+import no.sysco.middleware.kafka.metadata.collector.proto.topic.{ TopicCreatedPb, TopicDeletedPb, TopicEventPb }
 
 import scala.concurrent.ExecutionContext
 
 object TopicManager {
-  def props(pollFrequency: Duration, topicRepository: ActorRef, topicEventProducer: ActorRef): Props =
-    Props(new TopicManager(pollFrequency, topicRepository, topicEventProducer))
+  def props(pollInterval: Duration, bootstrapServers: String, topicEventTopic: String)(implicit actorMaterializer: ActorMaterializer) =
+    Props(new TopicManager(pollInterval, bootstrapServers, topicEventTopic))
 }
 
 /**
-  * Observe and publish Topic events.
-  * @param pollFrequency Frequency to poll topics from a Kafka Cluster.
-  * @param topicRepository Reference to Repository to poll data from.
-  * @param topicEventProducer Reference to Producer to publish events to.
-  */
-class TopicManager(pollFrequency: Duration, topicRepository: ActorRef, topicEventProducer: ActorRef) extends Actor {
+ * Observe and publish Topic events.
+ *
+ * @param pollInterval     Frequency to poll topics from a Kafka Cluster.
+ * @param bootstrapServers Kafka Bootstrap Servers.
+ * @param topicEventTopic  Topic where Events are stored.
+ */
+class TopicManager(pollInterval: Duration, bootstrapServers: String, topicEventTopic: String)(implicit actorMaterializer: ActorMaterializer)
+  extends Actor {
 
   implicit val executionContext: ExecutionContext = context.dispatcher
 
+  val topicEventProducer: ActorRef = context.actorOf(TopicEventProducer.props(bootstrapServers, topicEventTopic))
+  val topicRepository: ActorRef = context.actorOf(TopicRepository.props(bootstrapServers))
+  val topicEventConsumer: ActorRef = context.actorOf(TopicEventConsumer.props(self, bootstrapServers, topicEventTopic))
   var topicsAndDescription: Map[String, Option[Description]] = Map()
 
-  def evaluateCurrentTopics(names: List[String]): Unit = {
-    topicsAndDescription.keys.toList match {
+  def evaluateCurrentTopics(currentNames: List[String], names: List[String]): Unit = {
+    currentNames match {
       case Nil =>
       case name :: ns =>
         if (!names.contains(name))
           topicEventProducer ! TopicEventPb(name, TopicEventPb.Event.TopicDeleted(TopicDeletedPb()))
-        evaluateCurrentTopics(ns)
+        evaluateCurrentTopics(ns, names)
     }
   }
 
   def handleTopicsCollected(topicsCollected: TopicsCollected): Unit = {
-    evaluateCurrentTopics(topicsCollected.names)
+    evaluateCurrentTopics(topicsAndDescription.keys.toList, topicsCollected.names)
     evaluateTopicsCollected(topicsCollected.names)
   }
 
@@ -53,40 +59,47 @@ class TopicManager(pollFrequency: Duration, topicRepository: ActorRef, topicEven
 
   def handleTopicEvent(topicEvent: TopicEventPb): Unit =
     topicEvent.event match {
-      case event: Event if event.isTopicCreated =>
+      case event if event.isTopicCreated =>
         event.topicCreated match {
           case Some(_) =>
             topicRepository ! DescribeTopic(topicEvent.name)
             topicsAndDescription = topicsAndDescription + (topicEvent.name -> None)
+          case None =>
         }
-      case event: Event if event.isTopicUpdated =>
+      case event if event.isTopicUpdated =>
         event.topicUpdated match {
           case Some(topicUpdated) =>
             val topicDescription = Some(Parser.fromPb(topicEvent.name, topicUpdated.topicDescription.get))
             topicsAndDescription = topicsAndDescription + (topicEvent.name -> topicDescription)
+          case None =>
         }
 
-      case event: Event if event.isTopicDeleted =>
+      case event if event.isTopicDeleted =>
         event.topicDeleted match {
           case Some(_) =>
             topicsAndDescription = topicsAndDescription - topicEvent.name
+          case None =>
         }
     }
 
   def handleTopicDescribed(topicDescribed: TopicDescribed): Unit = topicDescribed.topicAndDescription match {
     case (name: String, description: Description) =>
       topicsAndDescription(name) match {
-        case currentTopicDescription =>
-          if (!currentTopicDescription.get.equals(description))
-            topicEventProducer ! TopicEventPb(name, TopicEventPb.Event.TopicUpdated(TopicUpdatedPb()))
+        case None =>
+          topicEventProducer ! TopicEventPb(name, TopicEventPb.Event.TopicUpdated(Parser.toPb(description)))
+        case Some(current) =>
+          if (!current.equals(description))
+            topicEventProducer ! TopicEventPb(name, TopicEventPb.Event.TopicUpdated(Parser.toPb(description)))
       }
   }
 
   def handleCollectTopics(): Unit = {
     topicRepository ! CollectTopics()
 
-    context.system.scheduler.scheduleOnce(pollFrequency, () => self ! CollectTopics())
+    context.system.scheduler.scheduleOnce(pollInterval, () => self ! CollectTopics())
   }
+
+  override def preStart(): Unit = self ! CollectTopics()
 
   override def receive: Receive = {
     case topicsCollected: TopicsCollected => handleTopicsCollected(topicsCollected)

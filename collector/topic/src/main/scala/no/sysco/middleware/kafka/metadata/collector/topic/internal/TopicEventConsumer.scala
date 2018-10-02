@@ -1,40 +1,66 @@
 package no.sysco.middleware.kafka.metadata.collector.topic.internal
 
-import akka.actor.ActorRef
+import akka.actor.{ Actor, ActorRef, Props }
 import akka.kafka.scaladsl.Consumer
-import akka.kafka.{ConsumerSettings, Subscriptions}
-import akka.stream.ActorMaterializer
-import akka.stream.scaladsl.Sink
-import com.typesafe.config.{Config, ConfigFactory}
+import akka.kafka.{ ConsumerSettings, Subscriptions }
+import akka.stream.scaladsl.{ Keep, Sink }
+import akka.stream.{ ActorMaterializer, KillSwitches, UniqueKillSwitch }
+import com.typesafe.config.Config
 import no.sysco.middleware.kafka.metadata.collector.proto.topic.TopicEventPb
 import org.apache.kafka.clients.consumer.ConsumerConfig
-import org.apache.kafka.common.serialization.{ByteArrayDeserializer, StringDeserializer}
+import org.apache.kafka.common.serialization.{ ByteArrayDeserializer, StringDeserializer }
+
+import scala.concurrent.duration._
+import scala.concurrent.{ ExecutionContextExecutor, Future }
 
 object TopicEventConsumer {
-  def apply(topicManager: ActorRef, topicEventTopic: String, bootstrapServers: String)(implicit materializer: ActorMaterializer): TopicEventConsumer =
-    new TopicEventConsumer(topicManager, topicEventTopic, bootstrapServers)
+
+  def props(topicManager: ActorRef, bootstrapServers: String, topicEventTopic: String)(implicit materializer: ActorMaterializer): Props =
+    Props(new TopicEventConsumer(topicManager, bootstrapServers, topicEventTopic))
 }
 
 /**
-  * Consume Topic events.
-  * @param topicManager Reference to Topic Manager, to consume events further.
-  */
-class TopicEventConsumer(topicManager: ActorRef, topicEventTopic: String, bootstrapServers: String)(implicit materializer: ActorMaterializer) {
+ * Consume Topic events.
+ *
+ * @param topicManager Reference to Topic Manager, to consume events further.
+ */
+class TopicEventConsumer(topicManager: ActorRef, bootstrapServers: String, topicEventTopic: String)(implicit materializer: ActorMaterializer)
+  extends Actor {
 
-  val config: Config = ConfigFactory.load()
-
+  private implicit val executionContext: ExecutionContextExecutor = context.system.dispatcher
+  val config: Config = context.system.settings.config.getConfig("akka.kafka.consumer")
   val consumerSettings: ConsumerSettings[String, Array[Byte]] =
     ConsumerSettings(config, new StringDeserializer, new ByteArrayDeserializer)
       .withBootstrapServers(bootstrapServers)
-      .withGroupId("kafka-metadata-collector-topic-internal-consumer")
+      .withPollInterval(100 millis)
       .withProperty(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, "false")
       .withProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest")
+      .withGroupId("kafka-metadata-collector-topic-internal-consumer")
 
-  val consumerSource: Consumer.Control =
+  val killSwitch: UniqueKillSwitch =
     Consumer.plainSource(consumerSettings, Subscriptions.topics(topicEventTopic))
+      .map(event => {
+        println(event)
+        event
+      })
       .map(record => TopicEventPb.parseFrom(record.value()))
-      .map(topicEvent => topicManager ! topicEvent)
+      .map(event => {
+        println(event)
+        event
+      })
+      .mapAsync(1)(topicEvent => Future {
+        topicManager ! topicEvent
+      })
+      .viaMat(KillSwitches.single)(Keep.right)
       .to(Sink.ignore)
-      .run()(materializer)
+      .run()
 
+  override def receive: Receive = {
+    case "stop" =>
+      println("Stopping")
+      killSwitch.shutdown()
+    case "done" =>
+      println("Done")
+      context.stop(self)
+  }
 }

@@ -1,8 +1,6 @@
 package no.sysco.middleware.ktm.utils
 
-
-
-import no.sysco.middleware.ktm.rest.{Team, TopicMetadata, TopicVendor}
+import no.sysco.middleware.ktm.rest.{ Team, TopicMetadata, TopicVendor }
 
 import scala.io.Source
 
@@ -22,7 +20,7 @@ object Utils {
       "some scope",
       "some config",
       withSla match {
-        case true => Option("some sla")
+        case true  => Option("some sla")
         case false => Option.empty
       }
     )
