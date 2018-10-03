@@ -4,7 +4,7 @@ import java.time.Duration
 
 import com.typesafe.config.Config
 
-class TopicCollectorConfig(config: Config) {
+class TopicEventCollectorConfig(config: Config) {
   object Collector {
     val pollInteval: Duration = config.getDuration("collector.topic.poll-interval")
     val topicEventTopic: String = config.getString("collector.topic.event-topic")
