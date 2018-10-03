@@ -2,11 +2,12 @@ package no.sysco.middleware.kafka.metadata.collector.topic.internal
 
 import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
-import akka.testkit.{ ImplicitSender, TestKit, TestProbe }
-import net.manub.embeddedkafka.{ EmbeddedKafka, EmbeddedKafkaConfig }
-import no.sysco.middleware.kafka.metadata.collector.proto.topic.{ TopicCreatedPb, TopicEventPb }
-import org.scalatest.{ BeforeAndAfterAll, Matchers, WordSpecLike }
+import akka.testkit.{ImplicitSender, TestKit, TestProbe}
+import net.manub.embeddedkafka.{EmbeddedKafka, EmbeddedKafkaConfig}
+import no.sysco.middleware.kafka.metadata.collector.proto.topic.{TopicCreatedPb, TopicEventPb}
+import org.scalatest.{BeforeAndAfterAll, Matchers, WordSpecLike}
 
+import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
 import scala.language.postfixOps
 
@@ -28,6 +29,7 @@ class TopicEventProducerConsumerSpec
     "send and receive Topic Events from/to a Kafka Topic" in {
       withRunningKafkaOnFoundPort(kafkaConfig) { implicit actualConfig =>
         implicit val actorMaterializer: ActorMaterializer = ActorMaterializer()
+        implicit val executionContext: ExecutionContext = system.dispatcher
         val probe = TestProbe()
         val bootstrapServers = s"localhost:${actualConfig.kafkaPort}"
         val topicEventTopic = "__topic"
