@@ -9,7 +9,8 @@ import no.sysco.middleware.kafka.metadata.collector.proto.topic.{ TopicCreatedPb
 import scala.concurrent.ExecutionContext
 
 object TopicManager {
-  def props(pollInterval: Duration, bootstrapServers: String, topicEventTopic: String)(implicit actorMaterializer: ActorMaterializer) =
+  def props(pollInterval: Duration, bootstrapServers: String, topicEventTopic: String)
+           (implicit actorMaterializer: ActorMaterializer, executionContext: ExecutionContext) =
     Props(new TopicManager(pollInterval, bootstrapServers, topicEventTopic))
 }
 
@@ -20,10 +21,9 @@ object TopicManager {
  * @param bootstrapServers Kafka Bootstrap Servers.
  * @param topicEventTopic  Topic where Events are stored.
  */
-class TopicManager(pollInterval: Duration, bootstrapServers: String, topicEventTopic: String)(implicit actorMaterializer: ActorMaterializer)
+class TopicManager(pollInterval: Duration, bootstrapServers: String, topicEventTopic: String)
+                  (implicit actorMaterializer: ActorMaterializer, val executionContext: ExecutionContext)
   extends Actor {
-
-  implicit val executionContext: ExecutionContext = context.dispatcher
 
   val topicEventProducer: ActorRef = context.actorOf(TopicEventProducer.props(bootstrapServers, topicEventTopic))
   val topicRepository: ActorRef = context.actorOf(TopicRepository.props(bootstrapServers))
@@ -41,8 +41,9 @@ class TopicManager(pollInterval: Duration, bootstrapServers: String, topicEventT
   }
 
   def handleTopicsCollected(topicsCollected: TopicsCollected): Unit = {
-    evaluateCurrentTopics(topicsAndDescription.keys.toList, topicsCollected.names)
-    evaluateTopicsCollected(topicsCollected.names)
+    val topics = topicsCollected.names.filter(_.equals(topicEventTopic))
+    evaluateCurrentTopics(topicsAndDescription.keys.toList, topics)
+    evaluateTopicsCollected(topics)
   }
 
   def evaluateTopicsCollected(topicNames: List[String]): Unit = topicNames match {
@@ -101,11 +102,15 @@ class TopicManager(pollInterval: Duration, bootstrapServers: String, topicEventT
 
   override def preStart(): Unit = self ! CollectTopics()
 
+  def handleListTopics(): Unit =
+    sender() ! Topics(topicsAndDescription)
+
   override def receive: Receive = {
     case topicsCollected: TopicsCollected => handleTopicsCollected(topicsCollected)
     case topicDescribed: TopicDescribed => handleTopicDescribed(topicDescribed)
     case topicEvent: TopicEventPb => handleTopicEvent(topicEvent)
     case CollectTopics() => handleCollectTopics()
+    case ListTopics() => handleListTopics()
   }
 
 }
