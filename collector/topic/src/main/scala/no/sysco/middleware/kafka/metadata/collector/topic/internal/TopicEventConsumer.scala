@@ -1,21 +1,22 @@
 package no.sysco.middleware.kafka.metadata.collector.topic.internal
 
-import akka.actor.{ Actor, ActorRef, Props }
+import akka.actor.{Actor, ActorRef, Props}
 import akka.kafka.scaladsl.Consumer
-import akka.kafka.{ ConsumerSettings, Subscriptions }
-import akka.stream.scaladsl.{ Keep, Sink }
-import akka.stream.{ ActorMaterializer, KillSwitches, UniqueKillSwitch }
+import akka.kafka.{ConsumerSettings, Subscriptions}
+import akka.stream.scaladsl.{Keep, Sink}
+import akka.stream.{ActorMaterializer, KillSwitches, UniqueKillSwitch}
 import com.typesafe.config.Config
 import no.sysco.middleware.kafka.metadata.collector.proto.topic.TopicEventPb
 import org.apache.kafka.clients.consumer.ConsumerConfig
-import org.apache.kafka.common.serialization.{ ByteArrayDeserializer, StringDeserializer }
+import org.apache.kafka.common.serialization.{ByteArrayDeserializer, StringDeserializer}
 
 import scala.concurrent.duration._
-import scala.concurrent.{ ExecutionContextExecutor, Future }
+import scala.concurrent.{ExecutionContext, ExecutionContextExecutor, Future}
 
 object TopicEventConsumer {
 
-  def props(topicManager: ActorRef, bootstrapServers: String, topicEventTopic: String)(implicit materializer: ActorMaterializer): Props =
+  def props(topicManager: ActorRef, bootstrapServers: String, topicEventTopic: String)
+           (implicit materializer: ActorMaterializer, executionContext: ExecutionContext): Props =
     Props(new TopicEventConsumer(topicManager, bootstrapServers, topicEventTopic))
 }
 
@@ -24,10 +25,10 @@ object TopicEventConsumer {
  *
  * @param topicManager Reference to Topic Manager, to consume events further.
  */
-class TopicEventConsumer(topicManager: ActorRef, bootstrapServers: String, topicEventTopic: String)(implicit materializer: ActorMaterializer)
+class TopicEventConsumer(topicManager: ActorRef, bootstrapServers: String, topicEventTopic: String)
+                        (implicit materializer: ActorMaterializer, executionContext: ExecutionContext )
   extends Actor {
 
-  private implicit val executionContext: ExecutionContextExecutor = context.system.dispatcher
   val config: Config = context.system.settings.config.getConfig("akka.kafka.consumer")
   val consumerSettings: ConsumerSettings[String, Array[Byte]] =
     ConsumerSettings(config, new StringDeserializer, new ByteArrayDeserializer)
