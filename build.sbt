@@ -2,7 +2,10 @@
 import scalariform.formatter.preferences._
 import Dependencies._
 
-val projectV = "0.0.1-SNAPSHOT"
+name := "kafka-metadata"
+organization := "no.sysco.middleware.kafka.metadata"
+version := "0.0.1-SNAPSHOT"
+
 val scalaV = "2.12.6"
 
 
@@ -11,17 +14,8 @@ val settings = Settings(scalaV).default
                                     /** projects */
 lazy val root = project
   .in(file("."))
-  .settings(
-    name := "ktm",
-    organization := "no.sysco.middleware.ktm",
-    version := projectV,
-    settings,
-    libraryDependencies ++= commonDependencies ++ observabilityDependencies ++ testDependencies,
-
-    mainClass in assembly := Some(s"no.sysco.middleware.ktm.Main"),
-    assemblyJarName in assembly := "ktm-fat-jar.jar"
-  )
   .aggregate(topicCollector)
+  .aggregate(api)
   .enablePlugins(JavaAppPackaging)
 
 lazy val topicCollector = project
@@ -33,6 +27,15 @@ lazy val topicCollector = project
     PB.targets in Compile := Seq(
       scalapb.gen() -> (sourceManaged in Compile).value
     )
+  )
+lazy val api = project
+  .in(file("api"))
+  .settings(
+    name := "metadata-collector-topic-api",
+    organization := "no.sysco.middleware.kafka.metadata",
+    libraryDependencies ++= commonDependencies ++ observabilityDependencies ++ testDependencies,
+    mainClass in assembly := Some(s"no.sysco.middleware.kafka.metadata.api.Main"),
+        assemblyJarName in assembly := "api-fat-jar.jar"
   )
 
 lazy val schemas = project
