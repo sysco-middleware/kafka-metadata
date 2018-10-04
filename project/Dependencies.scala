@@ -33,5 +33,6 @@ object Dependencies {
 
   // test dependencies
   val scala_test                = "org.scalatest"       %% "scalatest"              % Versions.scala_test     % Test
+  val akka_test_kit             = "com.typesafe.akka" %% "akka-testkit" % "2.5.17" % Test
 }
 
