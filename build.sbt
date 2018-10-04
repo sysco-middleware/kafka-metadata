@@ -2,8 +2,8 @@
 import scalariform.formatter.preferences._
 import Dependencies._
 
-val projectV = "0.0.1-SNAPSHOT"
-val scalaV = "2.12.6"
+val projectV = "0.1.0-SNAPSHOT"
+val scalaV = "2.12.7"
 
 // https://www.scala-sbt.org/release/docs/Basic-Def-Examples.html
 lazy val settings = Seq(
@@ -21,7 +21,7 @@ lazy val settings = Seq(
   javacOptions ++= Seq("-source", "1.8", "-target", "1.8"),
 
   // set the initial commands when entering 'console' or 'consoleQuick', but not 'consoleProject'
-  initialCommands in console := "import no.sysco.middleware.ktm._",
+  initialCommands in console := "import no.sysco.middleware.kafka.metadata._",
 
   // only use a single thread for building
   parallelExecution := false,
@@ -33,35 +33,23 @@ lazy val settings = Seq(
 
                                     /** projects */
 lazy val root = project
-  .in(file("."))
+  .in(file("topic"))
   .settings(
-    name := "ktm",
-    organization := "no.sysco.middleware.ktm",
+    name := "kafka-metadata-topic",
+    organization := "no.sysco.middleware.kafka.metadata",
     version := projectV,
     settings,
     libraryDependencies ++= commonDependencies ++ observabilityDependencies ++ testDependencies,
 
-    mainClass in assembly := Some(s"no.sysco.middleware.ktm.Main"),
+    mainClass in assembly := Some(s"no.sysco.middleware.kafka.metadata.topic.Main"),
     assemblyJarName in assembly := "ktm-fat-jar.jar"
   )
-  .aggregate(topicCollector)
   .enablePlugins(JavaAppPackaging)
 
-lazy val topicCollector = project
-  .in(file("collector/topic"))
+lazy val schema = project
+  .in(file("schema"))
   .settings(
-    name := "metadata-collector-topic",
-    organization := "no.sysco.middleware.kafka.metadata",
-    libraryDependencies ++= commonDependencies ++ observabilityDependencies ++ testDependencies,
-    PB.targets in Compile := Seq(
-      scalapb.gen() -> (sourceManaged in Compile).value
-    )
-  )
-
-lazy val schemas = project
-  .in(file("schemas"))
-  .settings(
-    name := "metadata-schemas",
+    name := "schema",
     organization := "no.sysco.middleware.kafka.metadata",
     libraryDependencies ++= commonDependencies ++ observabilityDependencies ++ testDependencies,
   )
