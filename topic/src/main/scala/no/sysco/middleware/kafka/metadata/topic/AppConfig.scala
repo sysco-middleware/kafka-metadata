@@ -14,7 +14,7 @@ case class ApplicationConfig(kafka: KafkaConfig, rest: RestConfig, env: Env.Valu
 object AppConfig {
 
   def loadConfig(): ApplicationConfig = {
-    val config = ConfigFactory.load("src/main/resources/application.conf")
+    val config = ConfigFactory.load()
     println(config)
     val kafka = KafkaConfig(config.getString("kafka.bootstrap-servers"), config.getLong("kafka.timeout"))
     val rest = RestConfig(
