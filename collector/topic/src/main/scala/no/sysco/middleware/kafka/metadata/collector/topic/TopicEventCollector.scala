@@ -26,7 +26,7 @@ class TopicEventCollector(implicit actorSystem: ActorSystem, actorMaterializer: 
   val topicManager: ActorRef =
     actorSystem.actorOf(
       TopicManager.props(
-        appConfig.Collector.pollInteval,
+        appConfig.Collector.pollInterval,
         appConfig.Kafka.bootstrapServers,
         appConfig.Collector.topicEventTopic))
 

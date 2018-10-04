@@ -9,8 +9,7 @@ import no.sysco.middleware.kafka.metadata.collector.proto.topic.{ TopicCreatedPb
 import scala.concurrent.ExecutionContext
 
 object TopicManager {
-  def props(pollInterval: Duration, bootstrapServers: String, topicEventTopic: String)
-           (implicit actorMaterializer: ActorMaterializer, executionContext: ExecutionContext) =
+  def props(pollInterval: Duration, bootstrapServers: String, topicEventTopic: String)(implicit actorMaterializer: ActorMaterializer, executionContext: ExecutionContext) =
     Props(new TopicManager(pollInterval, bootstrapServers, topicEventTopic))
 }
 
@@ -21,8 +20,7 @@ object TopicManager {
  * @param bootstrapServers Kafka Bootstrap Servers.
  * @param topicEventTopic  Topic where Events are stored.
  */
-class TopicManager(pollInterval: Duration, bootstrapServers: String, topicEventTopic: String)
-                  (implicit actorMaterializer: ActorMaterializer, val executionContext: ExecutionContext)
+class TopicManager(pollInterval: Duration, bootstrapServers: String, topicEventTopic: String)(implicit actorMaterializer: ActorMaterializer, val executionContext: ExecutionContext)
   extends Actor {
 
   val topicEventProducer: ActorRef = context.actorOf(TopicEventProducer.props(bootstrapServers, topicEventTopic))

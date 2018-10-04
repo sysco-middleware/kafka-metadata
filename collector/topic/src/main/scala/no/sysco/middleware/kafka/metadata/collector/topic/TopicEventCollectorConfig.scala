@@ -6,7 +6,7 @@ import com.typesafe.config.Config
 
 class TopicEventCollectorConfig(config: Config) {
   object Collector {
-    val pollInteval: Duration = config.getDuration("collector.topic.poll-interval")
+    val pollInterval: Duration = config.getDuration("collector.topic.poll-interval")
     val topicEventTopic: String = config.getString("collector.topic.event-topic")
   }
   object Kafka {
