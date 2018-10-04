@@ -3,11 +3,11 @@ package no.sysco.middleware.metadata.api.infrastructure
 import java.util.Properties
 
 import no.sysco.middleware.metadata.api.ApplicationConfig
-import no.sysco.middleware.metadata.api.application.KafkaService.{RegisterTopicMetadata, RegisteredTopicMetadataAttempt}
+import no.sysco.middleware.metadata.api.application.KafkaService.{ RegisterTopicMetadata, RegisteredTopicMetadataAttempt }
 import org.apache.kafka.clients.producer._
 import org.apache.kafka.common.serialization.StringSerializer
 
-import scala.concurrent.{ExecutionContext, Future, Promise}
+import scala.concurrent.{ ExecutionContext, Future, Promise }
 import scala.util.Try
 
 object KafkaTopicsMetadataRepositoryWrite {

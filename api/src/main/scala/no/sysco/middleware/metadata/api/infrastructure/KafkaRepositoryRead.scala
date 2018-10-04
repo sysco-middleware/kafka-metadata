@@ -2,9 +2,9 @@ package no.sysco.middleware.metadata.api.infrastructure
 
 import java.util.Properties
 
-import no.sysco.middleware.metadata.api.{AppConfig, ApplicationConfig}
-import org.apache.kafka.clients.admin.{AdminClient, AdminClientConfig, ListTopicsOptions}
-import org.apache.kafka.clients.consumer.{ConsumerConfig, KafkaConsumer}
+import no.sysco.middleware.metadata.api.{ AppConfig, ApplicationConfig }
+import org.apache.kafka.clients.admin.{ AdminClient, AdminClientConfig, ListTopicsOptions }
+import org.apache.kafka.clients.consumer.{ ConsumerConfig, KafkaConsumer }
 import org.apache.kafka.common.serialization.StringDeserializer
 
 // todo: remove after test

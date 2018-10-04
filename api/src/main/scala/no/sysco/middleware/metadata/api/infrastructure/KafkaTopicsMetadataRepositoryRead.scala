@@ -4,13 +4,13 @@ import java.util.Properties
 import java.util.concurrent.CountDownLatch
 
 import no.sysco.middleware.metadata.api.ApplicationConfig
-import no.sysco.middleware.metadata.api.rest.{TopicMetadata, TopicMetadataJsonProtocol}
+import no.sysco.middleware.metadata.api.rest.{ TopicMetadata, TopicMetadataJsonProtocol }
 import org.apache.kafka.common.KafkaException
 import org.apache.kafka.common.utils.Bytes
 import org.apache.kafka.streams.errors.BrokerNotFoundException
 import org.apache.kafka.streams.kstream.Materialized
-import org.apache.kafka.streams.state.{KeyValueIterator, KeyValueStore, QueryableStoreTypes, ReadOnlyKeyValueStore}
-import org.apache.kafka.streams.{KafkaStreams, StreamsBuilder, StreamsConfig, Topology}
+import org.apache.kafka.streams.state.{ KeyValueIterator, KeyValueStore, QueryableStoreTypes, ReadOnlyKeyValueStore }
+import org.apache.kafka.streams.{ KafkaStreams, StreamsBuilder, StreamsConfig, Topology }
 import org.slf4j.LoggerFactory
 import spray.json.JsonParser
 

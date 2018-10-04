@@ -5,10 +5,10 @@ import akka.event.Logging
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.Http.ServerBinding
 import akka.stream.ActorMaterializer
-import no.sysco.middleware.metadata.api.application.{KafkaTopicsMetadataService, ObserverActor}
+import no.sysco.middleware.metadata.api.application.{ KafkaTopicsMetadataService, ObserverActor }
 import no.sysco.middleware.metadata.api.rest.HttpRoutes
 
-import scala.concurrent.{Await, ExecutionContextExecutor, Future}
+import scala.concurrent.{ Await, ExecutionContextExecutor, Future }
 import scala.concurrent.duration._
 
 object Main extends App with HttpRoutes {

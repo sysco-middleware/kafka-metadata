@@ -13,14 +13,14 @@ import spray.json.{ DefaultJsonProtocol, RootJsonFormat }
 
 // Validation http://fruzenshtein.com/akka-http-model-validation-field-by-field/
 final case class TopicMetadata(
-    topicName: String,
-    description: String = "",
-    producers: List[Team] = List.empty[Team],
-    topicVendor: TopicVendor = TopicVendor(),
-    format: String = "",
-    scope: String = "",
-    config: String = "",
-    sla: Option[String] = Option.empty) {
+  topicName: String,
+  description: String = "",
+  producers: List[Team] = List.empty[Team],
+  topicVendor: TopicVendor = TopicVendor(),
+  format: String = "",
+  scope: String = "",
+  config: String = "",
+  sla: Option[String] = Option.empty) {
   require(!topicName.isEmpty, "topic_name must not be empty")
 
   override def toString: String = TopicMetadataJsonProtocol.json(this)

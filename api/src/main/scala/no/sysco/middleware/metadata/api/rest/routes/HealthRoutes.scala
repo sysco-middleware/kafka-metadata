@@ -1,7 +1,7 @@
 package no.sysco.middleware.metadata.api.rest.routes
 
-import akka.http.scaladsl.model.{ContentTypes, HttpEntity}
-import akka.http.scaladsl.server.Directives.{complete, get, path, pathEndOrSingleSlash}
+import akka.http.scaladsl.model.{ ContentTypes, HttpEntity }
+import akka.http.scaladsl.server.Directives.{ complete, get, path, pathEndOrSingleSlash }
 
 trait HealthRoutes {
 

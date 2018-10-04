@@ -1,13 +1,14 @@
 package no.sysco.middleware.metadata.api.rest.routes
 
-import akka.http.scaladsl.model.{ContentTypes, HttpEntity, HttpResponse, StatusCodes}
-import akka.http.scaladsl.server.Directives.{as, complete, entity, get, onSuccess, path, pathEndOrSingleSlash, post}
+import akka.http.scaladsl.model.{ ContentTypes, HttpEntity, HttpResponse, StatusCodes }
+import akka.http.scaladsl.server.Directives.{ as, complete, entity, get, onSuccess, path, pathEndOrSingleSlash, post }
 import akka.http.scaladsl.server.Route
 import akka.util.Timeout
 import no.sysco.middleware.metadata.api.application.KafkaService
-import no.sysco.middleware.metadata.api.application.KafkaService.{RegisterTopicMetadata, RegisteredTopicMetadataAttempt}
-import no.sysco.middleware.metadata.api.rest.{TopicMetadata, TopicMetadataJsonProtocol}
-
+import no.sysco.middleware.metadata.api.application.KafkaService.{ RegisterTopicMetadata, RegisteredTopicMetadataAttempt }
+import no.sysco.middleware.metadata.api.rest.{ TopicMetadata, TopicMetadataJsonProtocol }
+import scala.concurrent.duration._
+import akka.http.scaladsl.server.Directives._
 
 trait AppRoutes extends TopicMetadataJsonProtocol {
 
@@ -20,7 +21,7 @@ trait AppRoutes extends TopicMetadataJsonProtocol {
       pathEndOrSingleSlash {
         onSuccess(kafkaService.topicsMeta()) {
           case rez: Seq[TopicMetadata] => complete(rez)
-          case _                       => complete(StatusCodes.InternalServerError)
+          case _ => complete(StatusCodes.InternalServerError)
         }
       }
     } ~
