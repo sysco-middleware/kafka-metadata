@@ -33,6 +33,21 @@ lazy val settings = Seq(
 
                                     /** projects */
 lazy val root = project
+  .in(file("."))
+  .settings(
+    name := "kafka-metadata",
+    organization := "no.sysco.middleware.kafka.metadata",
+    version := projectV,
+    settings,
+    libraryDependencies ++= commonDependencies ++ observabilityDependencies ++ testDependencies,
+
+    mainClass in assembly := Some(s"no.sysco.middleware.kafka.metadata.topic.Main"),
+    assemblyJarName in assembly := "ktm-fat-jar.jar"
+  )
+  .aggregate(topic)
+  .enablePlugins(JavaAppPackaging)
+
+lazy val topic = project
   .in(file("topic"))
   .settings(
     name := "kafka-metadata-topic",
