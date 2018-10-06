@@ -1,0 +1,33 @@
+syntax = "proto3";
+
+package kafka.metadata.proto;
+
+option java_package = "no.sysco.middleware.kafka.proto";
+option java_multiple_files = true;
+
+
+enum EntityType {
+  TOPIC = 0;
+}
+
+message Entity {
+  EntityType entityType = 1;
+  string entityId = 2;
+  OpMetadata opMetadata = 3;
+  OrgMetadata orgMetadata = 4;
+  repeated Link links = 5;
+}
+
+message Link {
+  EntityType entityType = 1;
+  string entityId = 2;
+  string description = 3;
+}
+
+message OpMetadata {
+  map<string, string> entries = 1;
+}
+
+message OrgMetadata {
+  map<string, string> entries = 1;
+}
